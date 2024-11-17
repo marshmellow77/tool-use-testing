@@ -104,7 +104,7 @@ class ModelTester:
                 }
 
         except Exception as e:
-            logger.error(f"Error processing test case {test_case}: {str(e)}")
+            # logger.error(f"Error processing test case {test_case}: {str(e)}")
             return index, {
                 'test_case': test_case,
                 'user_query': user_query,

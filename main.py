@@ -29,6 +29,9 @@ logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 logging.getLogger('google.auth.transport.requests').setLevel(logging.ERROR)
 logging.getLogger('google.oauth2').setLevel(logging.ERROR)
 
+# Suppress Vertex AI engine message
+logging.getLogger('google.ai.generativelanguage.generative_models._async_engine').setLevel(logging.WARNING)
+
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -111,7 +114,9 @@ async def main():
             }
         }
     else:
-        raw_results = await tester.run_tests(use_tools=(args.mode == 'function_call'))
+        # If in no_function mode, use tools by default, otherwise follow function_call mode setting
+        use_tools = True if args.mode == 'no_function' else (args.mode == 'function_call')
+        raw_results = await tester.run_tests(use_tools=use_tools)
 
     # Create results directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
