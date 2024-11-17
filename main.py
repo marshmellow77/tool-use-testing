@@ -105,14 +105,15 @@ async def main():
     evaluator.save_results(results_dir)
 
     # Log summary
-    logger.info("\nEvaluation Summary:")
-    logger.info(f"Total test cases: {evaluation_results['total_tests']}")
-    logger.info(f"Correct predictions: {evaluation_results['correct_predictions']}")
-    logger.info(f"Incorrect predictions: {evaluation_results['incorrect_predictions']}")
-    logger.info(f"Accuracy: {evaluation_results['accuracy']:.2f}%")
+    logger.info(f"""
+Evaluation Summary:
+Total test cases: {evaluation_results['total_tests']}
+Correct predictions: {evaluation_results['correct_predictions']}
+Incorrect predictions: {evaluation_results['incorrect_predictions']}
+Accuracy: {evaluation_results['accuracy']:.2f}%
+""")
     
-    # Add a log statement to indicate completion of evaluation
-    logger.info("Evaluation completed. Saving results...")
+    logger.info("Results saved to: %s", results_dir)
 
 if __name__ == "__main__":
     asyncio.run(main())

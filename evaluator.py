@@ -4,6 +4,8 @@ import os
 import logging
 from datetime import datetime
 from vertexai.generative_models import GenerationConfig
+import asyncio
+from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -95,8 +97,6 @@ class Evaluator:
                 'reason': 'Model provided text response instead of function call',
                 'model_response_text': model_text
             }
-            self.incorrect_predictions += 1
-            self.detailed_results.append(result)
             return result, False
 
         # Compare function calls
@@ -104,7 +104,6 @@ class Evaluator:
         needs_semantic_check = not are_identical and self.model is not None
 
         if are_identical:
-            self.correct_predictions += 1
             result = {
                 'test_case': test_case,
                 'user_query': user_query,
@@ -123,7 +122,6 @@ class Evaluator:
             else:
                 mismatch_type = 'Parameters'
                 reason = f"Value differences: {', '.join(differences['param_differences'])}"
-                # We'll determine if it's correct after semantic evaluation
                 is_correct = False
 
             result = {
@@ -135,13 +133,7 @@ class Evaluator:
                 'mismatch_type': mismatch_type,
                 'reason': reason
             }
-            
-            if is_correct:
-                self.correct_predictions += 1
-            else:
-                self.incorrect_predictions += 1
 
-        self.detailed_results.append(result)
         return result, needs_semantic_check
 
     def _evaluate_text_response(self, record, model_response, test_case, user_query):
@@ -160,12 +152,7 @@ class Evaluator:
             'result': 'Correct' if is_correct else 'Incorrect'
         }
         
-        if is_correct:
-            self.correct_predictions += 1
-        else:
-            self.incorrect_predictions += 1
-            
-        self.detailed_results.append(result)
+        return result
 
     async def _evaluate_semantic_equivalence(self, user_query, expected_call, model_call, test_case):
         """Evaluate semantic equivalence of function calls using LLM judge"""
@@ -208,64 +195,41 @@ class Evaluator:
             }
 
     async def evaluate_results(self, raw_results):
-        """Evaluate raw test results"""
-        logger.info("Starting evaluation of raw results...")  # Log the start of evaluation
+        """Evaluate raw test results in parallel"""
+        logger.info("Starting evaluation of raw results...")
         test_dataset = raw_results['test_dataset']
         model_responses = raw_results['model_responses']
         self.test_mode = raw_results['test_mode']
         
         self.total_tests = len(test_dataset)
-        self.detailed_results = []  # Reset results for new evaluation
+        self.detailed_results = []  # Clear any existing results
         self.correct_predictions = 0
         self.incorrect_predictions = 0
-        self.semantic_comparisons = []  # Reset semantic comparisons
+        self.semantic_comparisons = []
         
+        # Create tasks for parallel evaluation
+        tasks = []
         for index, (record, model_response) in enumerate(zip(test_dataset, model_responses)):
             test_case = index + 1
-            user_query = record['user_query']
-            logger.info(f"Evaluating test case {test_case}/{self.total_tests}...")  # Log each test case evaluation
-            
-            if self.test_mode == 'function_call':
-                result, needs_semantic_check = self._evaluate_function_call(record, model_response, test_case, user_query)
-                
-                # Do semantic evaluation if needed
-                if needs_semantic_check:
-                    expected_call = record['assistant_response']['function_call']
-                    model_call = model_response.get('model_function_call')
-                    
-                    differences = self._get_function_call_differences(expected_call, model_call)
-                    all_params_equivalent = True
-                    
-                    # Check each different parameter
-                    for param, (expected_val, model_val) in differences['param_values'].items():
-                        semantic_result = await self._evaluate_semantic_equivalence(
-                            f"Parameter '{param}' for query: {user_query}",
-                            expected_val,
-                            model_val,
-                            test_case
-                        )
-                        self.semantic_comparisons.append(semantic_result)
-                        
-                        # If any parameter is not equivalent, the whole call is not equivalent
-                        if not semantic_result['is_semantically_equivalent']:
-                            all_params_equivalent = False
-                    
-                    # Update result only once per function call
-                    if all_params_equivalent:
-                        # Adjust the counts only once
-                        self.incorrect_predictions -= 1
-                        self.correct_predictions += 1
-                        # Update the result
-                        result['result'] = 'Correct'
-                        # Remove mismatch info since it's semantically correct
-                        result.pop('mismatch_type', None)
-                        result.pop('reason', None)
+            task = self._evaluate_test_case(record, model_response, test_case)
+            tasks.append(task)
+        
+        # Run all evaluations in parallel
+        results = await asyncio.gather(*tasks)
+        
+        # Process results once
+        for result in results:
+            if result['is_correct']:
+                self.correct_predictions += 1
             else:
-                self._evaluate_text_response(record, model_response, test_case, user_query)
+                self.incorrect_predictions += 1
+            self.detailed_results.append(result['detailed_result'])
+            if 'semantic_comparisons' in result:
+                self.semantic_comparisons.extend(result['semantic_comparisons'])
 
         accuracy = (self.correct_predictions / self.total_tests) * 100 if self.total_tests > 0 else 0
         
-        logger.info("Evaluation completed.")  # Log when evaluation is completed
+        logger.info("Evaluation completed.")
         return {
             'total_tests': self.total_tests,
             'correct_predictions': self.correct_predictions,
@@ -274,6 +238,58 @@ class Evaluator:
             'detailed_results': self.detailed_results,
             'semantic_comparisons': self.semantic_comparisons
         }
+
+    async def _evaluate_test_case(self, record: Dict[str, Any], model_response: Dict[str, Any], test_case: int) -> Dict[str, Any]:
+        """Evaluate a single test case"""
+        user_query = record['user_query']
+        logger.info(f"Evaluating test case {test_case}/{self.total_tests}...")
+        
+        if self.test_mode == 'function_call':
+            result, needs_semantic_check = self._evaluate_function_call(record, model_response, test_case, user_query)
+            
+            if needs_semantic_check:
+                expected_call = record['assistant_response']['function_call']
+                model_call = model_response.get('model_function_call')
+                differences = self._get_function_call_differences(expected_call, model_call)
+                
+                # Run semantic evaluations in parallel
+                semantic_tasks = []
+                for param, (expected_val, model_val) in differences['param_values'].items():
+                    task = self._evaluate_semantic_equivalence(
+                        f"Parameter '{param}' for query: {user_query}",
+                        expected_val,
+                        model_val,
+                        test_case
+                    )
+                    semantic_tasks.append(task)
+                
+                semantic_results = await asyncio.gather(*semantic_tasks)
+                all_params_equivalent = all(r['is_semantically_equivalent'] for r in semantic_results)
+                
+                if all_params_equivalent:
+                    result['result'] = 'Correct'
+                    result.pop('mismatch_type', None)
+                    result.pop('reason', None)
+                    is_correct = True
+                else:
+                    is_correct = False
+                
+                return {
+                    'is_correct': is_correct,
+                    'detailed_result': result,
+                    'semantic_comparisons': semantic_results
+                }
+            
+            return {
+                'is_correct': result['result'] == 'Correct',
+                'detailed_result': result
+            }
+        else:
+            result = self._evaluate_text_response(record, model_response, test_case, user_query)
+            return {
+                'is_correct': result['result'] == 'Correct',
+                'detailed_result': result
+            }
 
     def save_results(self, results_dir):
         """Save evaluation results to files"""
