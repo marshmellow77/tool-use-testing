@@ -110,6 +110,9 @@ async def main():
     logger.info(f"Correct predictions: {evaluation_results['correct_predictions']}")
     logger.info(f"Incorrect predictions: {evaluation_results['incorrect_predictions']}")
     logger.info(f"Accuracy: {evaluation_results['accuracy']:.2f}%")
+    
+    # Add a log statement to indicate completion of evaluation
+    logger.info("Evaluation completed. Saving results...")
 
 if __name__ == "__main__":
     asyncio.run(main())

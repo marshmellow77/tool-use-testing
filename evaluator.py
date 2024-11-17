@@ -209,6 +209,7 @@ class Evaluator:
 
     async def evaluate_results(self, raw_results):
         """Evaluate raw test results"""
+        logger.info("Starting evaluation of raw results...")  # Log the start of evaluation
         test_dataset = raw_results['test_dataset']
         model_responses = raw_results['model_responses']
         self.test_mode = raw_results['test_mode']
@@ -222,6 +223,7 @@ class Evaluator:
         for index, (record, model_response) in enumerate(zip(test_dataset, model_responses)):
             test_case = index + 1
             user_query = record['user_query']
+            logger.info(f"Evaluating test case {test_case}/{self.total_tests}...")  # Log each test case evaluation
             
             if self.test_mode == 'function_call':
                 result, needs_semantic_check = self._evaluate_function_call(record, model_response, test_case, user_query)
@@ -263,6 +265,7 @@ class Evaluator:
 
         accuracy = (self.correct_predictions / self.total_tests) * 100 if self.total_tests > 0 else 0
         
+        logger.info("Evaluation completed.")  # Log when evaluation is completed
         return {
             'total_tests': self.total_tests,
             'correct_predictions': self.correct_predictions,
