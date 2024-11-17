@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-import openai
+from openai import AsyncOpenAI
 from vertexai.generative_models import (
     GenerativeModel,
     GenerationConfig,
@@ -24,12 +24,7 @@ logger = logging.getLogger(__name__)
 
 class LLMModel(ABC):
     @abstractmethod
-    async def generate_response(self, user_query, use_tools=False, functions=None):
-        pass
-
-    @abstractmethod
-    async def get_full_prompt(self, user_query: str) -> str:
-        """Get the full prompt including system message and user query"""
+    async def generate_response(self, user_query, use_tools=False, tool=None):
         pass
 
 class OpenAIModel(LLMModel):
@@ -37,32 +32,71 @@ class OpenAIModel(LLMModel):
         self.model_name = model_name
         self.temperature = temperature
         self.system_prompt = system_prompt or "You are a helpful assistant."
-        openai.api_key = api_key
+        self.client = AsyncOpenAI(api_key=api_key)
 
-    async def get_full_prompt(self, user_query: str) -> str:
-        """Get the full prompt including system message and user query"""
-        return f"System: {self.system_prompt}\nUser: {user_query}"
-
-    async def generate_response(self, user_query, use_tools=False, functions=None):
+    async def generate_response(self, user_query, use_tools=False, tool=None):
         messages = [
             {"role": "system", "content": self.system_prompt},
             {"role": "user", "content": user_query}
         ]
 
-        if use_tools and functions:
-            response = await openai.ChatCompletion.acreate(
-                model=self.model_name,
-                messages=messages,
-                functions=functions,
-                temperature=self.temperature,
-            )
-        else:
-            response = await openai.ChatCompletion.acreate(
-                model=self.model_name,
-                messages=messages,
-                temperature=self.temperature,
-            )
-        return response
+        try:
+            if use_tools and tool:
+                tools = [{
+                    "type": "function",
+                    "function": {
+                        "name": tool["name"],
+                        "description": tool["description"],
+                        "parameters": tool["parameters"]
+                    }
+                }]
+                
+                response = await self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    tools=tools,
+                    tool_choice={"type": "function", "function": {"name": tool["name"]}},
+                    temperature=self.temperature,
+                )
+                
+                message = response.choices[0].message
+                
+                if hasattr(message, 'tool_calls') and message.tool_calls:
+                    tool_call = message.tool_calls[0]
+                    return {
+                        "model_function_call": {
+                            "name": tool_call.function.name,
+                            "arguments": json.loads(tool_call.function.arguments)
+                        },
+                        "full_model_response": message.content,
+                        "error": None
+                    }
+                
+                return {
+                    "model_function_call": None,
+                    "full_model_response": message.content,
+                    "error": None
+                }
+            else:
+                response = await self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    temperature=self.temperature,
+                )
+                
+                return {
+                    "model_function_call": None,
+                    "full_model_response": response.choices[0].message.content,
+                    "error": None
+                }
+
+        except Exception as e:
+            logger.error(f"Error generating response: {str(e)}")
+            return {
+                "model_function_call": None,
+                "full_model_response": None,
+                "error": str(e)
+            }
 
 class GeminiModel(LLMModel):
     def __init__(self, model_id, temperature=0):
@@ -72,10 +106,6 @@ class GeminiModel(LLMModel):
             temperature=temperature,
             candidate_count=1
         )
-
-    async def get_full_prompt(self, user_query: str, use_tools=False) -> str:
-        """Get the full prompt including system message and user query"""
-        return f"User: {user_query}"
 
     async def generate_response(self, user_query, use_tools=False, tool=None):
         try:

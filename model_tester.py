@@ -21,94 +21,104 @@ class ModelTester:
         self.test_dataset = test_dataset
         self.test_mode = test_mode
         
-        # For Gemini, we need to create a Tool instance with proper function declarations
-        if isinstance(model, GeminiModel):
-            logger.info("Creating Tool instance for Gemini model")
-            self.tool = Tool(function_declarations=ALL_FUNCTIONS)
-        else:
-            self.tool = None
+        # Initialize tools based on model type
+        model_type = "gemini" if isinstance(model, GeminiModel) else "openai"
+        logger.info(f"Creating tool configuration for {model_type} model")
+        self.tools = ALL_FUNCTIONS.get_functions_for_model(model_type)
+        logger.info(f"Initialized {len(self.tools) if isinstance(self.tools, list) else 'Gemini'} tools")
 
     async def process_test_case(self, index, record, use_tools):
         """Process a single test case"""
         test_case = index + 1
         user_query = record['user_query']
-        logger.info(f"Processing test case {test_case}/{len(self.test_dataset)}")
+        
+        logger.info(f"\nProcessing test case {test_case}/{len(self.test_dataset)}")
+        logger.info(f"User query: {user_query}")
         
         try:
-            # Get the full prompt that will be sent to the model
-            full_prompt = await self.model.get_full_prompt(user_query, use_tools=use_tools)
+            # Get the expected function from the assistant_response
+            expected_function = None
+            if 'assistant_response' in record and 'function_call' in record['assistant_response']:
+                expected_function = record['assistant_response']['function_call']['name']
             
-            if self.test_mode == 'function_call':
-                response = await self.model.generate_response(
-                    user_query, 
-                    use_tools=use_tools,
-                    tool=self.tool
-                )
-                
-                result = {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'full_prompt': full_prompt,
-                    'full_model_response': str(response),
-                    'model_function_call': None,  # Will be updated if function call exists
-                    'text': None  # Initialize text field
-                }
-                
-                # Extract function call based on model type
-                if isinstance(self.model, GeminiModel):
-                    if (hasattr(response, 'candidates') and response.candidates and 
-                        hasattr(response.candidates[0], 'function_calls') and 
-                        response.candidates[0].function_calls):
-                        
-                        function_call = response.candidates[0].function_calls[0]
-                        result['model_function_call'] = {
-                            'name': function_call.name,
-                            'arguments': function_call.args
-                        }
-                    else:
-                        # Extract text from Gemini response when no function call is made
-                        if hasattr(response, 'candidates') and response.candidates:
-                            result['text'] = response.candidates[0].content.parts[0].text
-                else:  # OpenAI model
-                    choice = response['choices'][0]['message']
-                    if 'function_call' in choice:
-                        function_call = choice['function_call']
-                        try:
+            logger.info(f"Expected function: {expected_function}")
+            logger.info(f"Use tools: {use_tools}")
+            
+            current_tool = None
+            if use_tools:
+                if self.test_mode == 'no_function':
+                    # Always provide tools in no_function mode if use_tools is True
+                    if isinstance(self.model, GeminiModel):
+                        current_tool = self.tools
+                    else:  # OpenAI
+                        current_tool = self.tools  # Pass all tools for OpenAI
+                elif expected_function:
+                    # In function_call mode, only pass the expected tool
+                    if isinstance(self.model, GeminiModel):
+                        current_tool = self.tools
+                    else:  # OpenAI
+                        current_tool = next(
+                            (tool for tool in self.tools 
+                             if tool["name"] == expected_function),
+                            None
+                        )
+            
+            response = await self.model.generate_response(
+                user_query, 
+                use_tools=use_tools,
+                tool=current_tool
+            )
+            
+            result = {
+                'test_case': test_case,
+                'user_query': user_query,
+                'full_model_response': str(response),
+                'model_function_call': None,  # Will be updated if function call exists
+                'text': None  # Initialize text field
+            }
+            
+            # Extract function call based on model type
+            if isinstance(self.model, GeminiModel):
+                if (hasattr(response, 'candidates') and response.candidates and 
+                    hasattr(response.candidates[0], 'function_calls') and 
+                    response.candidates[0].function_calls):
+                    
+                    function_call = response.candidates[0].function_calls[0]
+                    result['model_function_call'] = {
+                        'name': function_call.name,
+                        'arguments': function_call.args
+                    }
+                else:
+                    # Extract text from Gemini response when no function call is made
+                    if hasattr(response, 'candidates') and response.candidates:
+                        result['text'] = response.candidates[0].content.parts[0].text
+            else:  # OpenAI model
+                if 'model_function_call' in response and response['model_function_call']:
+                    function_call = response['model_function_call']
+                    try:
+                        # Check if arguments is already a dict
+                        if isinstance(function_call['arguments'], dict):
+                            arguments = function_call['arguments']
+                        else:
                             arguments = json.loads(function_call['arguments'])
-                        except json.JSONDecodeError:
-                            logger.error("Failed to parse function arguments")
-                            arguments = {}
-                        result['model_function_call'] = {
-                            'name': function_call['name'],
-                            'arguments': arguments
-                        }
-                    else:
-                        # Extract text from OpenAI response when no function call is made
-                        result['text'] = choice.get('content', '')
-                
-                return index, result
-                
-            else:
-                # Handle no_function mode
-                response = await self.model.generate_response(
-                    user_query, 
-                    use_tools=use_tools,
-                    tool=self.tool
-                )
-                return index, {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'full_prompt': full_prompt,
-                    'model_response': response.text if hasattr(response, 'text') else str(response),
-                    'full_model_response': str(response)
-                }
-
+                    except (json.JSONDecodeError, TypeError):
+                        logger.error("Failed to parse function arguments")
+                        arguments = {}
+                    result['model_function_call'] = {
+                        'name': function_call['name'],
+                        'arguments': arguments
+                    }
+                else:
+                    # Extract text from OpenAI response when no function call is made
+                    result['text'] = response['full_model_response']
+            
+            return index, result
+            
         except Exception as e:
             # logger.error(f"Error processing test case {test_case}: {str(e)}")
             return index, {
                 'test_case': test_case,
                 'user_query': user_query,
-                'full_prompt': full_prompt if 'full_prompt' in locals() else None,
                 'model_function_call': None,
                 'full_model_response': None,
                 'error': str(e)
@@ -137,76 +147,3 @@ class ModelTester:
             'model_responses': model_responses,
             'test_mode': self.test_mode
         }
-
-    # async def _process_no_function_record(self, record, index, use_tools=False):
-    #     """Process a test record in no-function mode"""
-    #     try:
-    #         user_prompt = Content(
-    #             role="user",
-    #             parts=[Part.from_text(record['user_query'])]
-    #         )
-
-    #         # Conditionally include tools
-    #         tools = [self.tool] if use_tools else None
-    #         tool_config = (
-    #             ToolConfig(
-    #                 function_calling_config=ToolConfig.FunctionCallingConfig(
-    #                     mode=ToolConfig.FunctionCallingConfig.Mode.AUTO
-    #                 )
-    #             )
-    #         ) if use_tools else None
-
-    #         response = await self.call_model_with_retry(
-    #             self.model,
-    #             user_prompt,
-    #             generation_config=self.generation_config,
-    #             tools=tools,
-    #             tool_config=tool_config
-    #         )
-
-    #         # Check for function calls first
-    #         if (hasattr(response, 'candidates') and 
-    #             response.candidates and 
-    #             hasattr(response.candidates[0], 'content') and 
-    #             hasattr(response.candidates[0].content, 'parts')):
-                
-    #             parts = response.candidates[0].content.parts
-    #             if parts and hasattr(parts[0], 'function_call'):
-    #                 # Model made a function call when it shouldn't have
-    #                 return {
-    #                     'test_case': index + 1,
-    #                     'user_query': record['user_query'],
-    #                     'expected_response': record['assistant_response']['content'],
-    #                     'model_response': f"Made function call: {parts[0].function_call.name}",
-    #                     'result': 'Incorrect',
-    #                     'reason': 'Model made a function call when it should not have',
-    #                     'run_type': 'with_tools' if use_tools else 'no_tools'
-    #                 }
-
-    #             # If no function call, try to get text
-    #             if parts and hasattr(parts[0], 'text'):
-    #                 model_text = parts[0].text
-    #             else:
-    #                 model_text = "No text response available"
-    #         else:
-    #             model_text = getattr(response, 'text', 'No text response available')
-
-    #         return {
-    #             'test_case': index + 1,
-    #             'user_query': record['user_query'],
-    #             'expected_response': record['assistant_response']['content'],
-    #             'model_response': model_text,
-    #             'run_type': 'with_tools' if use_tools else 'no_tools'
-    #         }
-
-    #     except Exception as e:
-    #         logger.error(f"Error in test case {index + 1}: {str(e)}")
-    #         return {
-    #             'test_case': index + 1,
-    #             'user_query': record['user_query'],
-    #             'expected_response': record['assistant_response']['content'],
-    #             'model_response': f"Error: {str(e)}",
-    #             'result': 'Incorrect',
-    #             'reason': str(e),
-    #             'run_type': 'with_tools' if use_tools else 'no_tools'
-    #         }

@@ -32,8 +32,12 @@ logging.getLogger('google.oauth2').setLevel(logging.ERROR)
 # Suppress Vertex AI engine message
 logging.getLogger('google.ai.generativelanguage.generative_models._async_engine').setLevel(logging.WARNING)
 
+# Add these lines to suppress OpenAI client logs
+logging.getLogger('openai').setLevel(logging.WARNING)
+logging.getLogger('httpx').setLevel(logging.WARNING)
+
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 def load_dataset(dataset_path):

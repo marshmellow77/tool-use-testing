@@ -156,16 +156,37 @@ class Evaluator:
 
         return result, needs_semantic_check
 
-    def _evaluate_text_response(self, record, model_response, test_case, user_query):
+    async def _evaluate_text_response(self, record, model_response, test_case, user_query):
         """Evaluate a text response test case"""
         expected_text = record['assistant_response']['content']
         
         # If it's a processed response (dict)
         if isinstance(model_response, dict):
+            # Check for function call in model response first
+            if model_response.get('model_function_call'):
+                function_call = model_response['model_function_call']
+                return {
+                    'test_case': test_case,
+                    'user_query': user_query,
+                    'expected_response': expected_text,
+                    'model_response': f"Made function call: {function_call['name']}",
+                    'result': 'Incorrect',
+                    'reason': 'Model made a function call when it should not have'
+                }, False
+            elif 'function_calls' in model_response:
+                function_call = model_response['function_calls'][0]
+                return {
+                    'test_case': test_case,
+                    'user_query': user_query,
+                    'expected_response': expected_text,
+                    'model_response': f"Made function call: {function_call['name']}",
+                    'result': 'Incorrect',
+                    'reason': 'Model made a function call when it should not have'
+                }, False
+            
             # Check for error message containing function call info
             if 'error' in model_response:
                 error_msg = model_response['error']
-                # Extract function name from the error message using string parsing
                 if '"name": "' in error_msg:
                     function_name = error_msg.split('"name": "')[1].split('"')[0]
                     return {
@@ -177,35 +198,16 @@ class Evaluator:
                         'reason': 'Model made a function call when it should not have'
                     }, False
             
-            # Check for function call in model response
-            if model_response.get('model_function_call'):  # Check for function call in model response
-                function_call = model_response['model_function_call']
-                return {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'expected_response': expected_text,
-                    'model_response': f"Made function call: {function_call['name']}",
-                    'result': 'Incorrect',
-                    'reason': 'Model made a function call when it should not have'
-                }, False
-            elif 'function_calls' in model_response:  # Check for function_calls array
-                function_call = model_response['function_calls'][0]
-                return {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'expected_response': expected_text,
-                    'model_response': f"Made function call: {function_call['name']}",
-                    'result': 'Incorrect',
-                    'reason': 'Model made a function call when it should not have'
-                }, False
+            model_text = (
+                model_response.get('model_response') or
+                model_response.get('text') or
+                model_response.get('content', '')
+            ).strip()
             
-            model_text = model_response.get('model_response')
             if not model_text:  # If no text response, assume function call
-                # Handle case where model_response might be None
+                function_name = 'unknown'
                 if model_response.get('model_function_call'):
                     function_name = model_response['model_function_call'].get('name', 'unknown')
-                else:
-                    function_name = 'unknown'
                 return {
                     'test_case': test_case,
                     'user_query': user_query,
@@ -214,12 +216,12 @@ class Evaluator:
                     'result': 'Incorrect',
                     'reason': 'Model made a function call when it should not have'
                 }, False
-    
+        
         # Fallback for other response types
         else:
             try:
                 model_text = model_response.text if hasattr(model_response, 'text') else f"Made function call: unknown"
-            except (AttributeError, TypeError):  # Added TypeError for None case
+            except (AttributeError, TypeError):
                 return {
                     'test_case': test_case,
                     'user_query': user_query,
@@ -228,15 +230,15 @@ class Evaluator:
                     'result': 'Incorrect',
                     'reason': 'Model made a function call when it should not have'
                 }, False
-        
+
         # Normal text response evaluation
         result = {
             'test_case': test_case,
             'user_query': user_query,
             'expected_response': expected_text,
             'model_response': model_text,
-            'result': 'Incorrect',  # Default to incorrect
-            'reason': 'Responses are semantically different'  # Add default reason
+            'result': 'Incorrect',
+            'reason': 'Responses are semantically different'
         }
         
         # Check for exact match first
@@ -245,16 +247,23 @@ class Evaluator:
         
         if is_exact_match:
             result['result'] = 'Correct'
-            result.pop('reason')  # Remove reason if correct
+            result.pop('reason', None)
         
         return result, needs_semantic_check
 
-    async def _evaluate_semantic_equivalence(self, user_query, expected_call, model_call, test_case):
-        """Evaluate semantic equivalence of function calls using LLM judge"""
+    async def _evaluate_semantic_equivalence(self, user_query, expected_text, model_text, test_case):
+        """Evaluate semantic equivalence using LLM judge"""
+        # Clean and format the texts for comparison
+        expected_text = str(expected_text).strip()
+        model_text = str(model_text).strip()
+        
+        # Remove markdown formatting from model text if present
+        model_text = model_text.replace('**', '').replace('*', '')
+        
         prompt = self.prompt_template.format(
             question=user_query,
-            text1=json.dumps(expected_call, indent=2),
-            text2=json.dumps(model_call, indent=2) if model_call else "No function call made"
+            text1=expected_text,
+            text2=model_text
         )
 
         try:
@@ -268,23 +277,31 @@ class Evaluator:
             )
             
             judgment = response.text.strip().lower()
-            is_equivalent = 'equivalent' in judgment or 'yes' in judgment
+            # Check for explicit "different" or "not equivalent" before checking for "equivalent"
+            is_equivalent = (
+                'equivalent' in judgment and 
+                'not equivalent' not in judgment and 
+                'not semantically equivalent' not in judgment and
+                'different' not in judgment
+            )
             
-            return {
+            comparison_result = {
                 'test_case': test_case,
                 'user_query': user_query,
-                'expected_call': expected_call,
-                'model_call': model_call,
+                'expected_text': expected_text,
+                'model_text': model_text,
                 'is_semantically_equivalent': is_equivalent,
                 'judge_explanation': response.text
             }
+            
+            return comparison_result
         except Exception as e:
             logger.error(f"Error in semantic evaluation for test case {test_case}: {str(e)}")
             return {
                 'test_case': test_case,
                 'user_query': user_query,
-                'expected_call': expected_call,
-                'model_call': model_call,
+                'expected_text': expected_text,
+                'model_text': model_text,
                 'is_semantically_equivalent': False,
                 'judge_explanation': f"Error in semantic evaluation: {str(e)}"
             }
@@ -359,19 +376,18 @@ class Evaluator:
     async def _evaluate_test_case(self, record: Dict[str, Any], model_response: Dict[str, Any], test_case: int) -> Dict[str, Any]:
         """Evaluate a single test case"""
         user_query = record['user_query']
-        run_type = model_response.get('run_type', 'with_tools')  # Get run_type from response
+        run_type = model_response.get('run_type', 'default')
         logger.info(f"Evaluating test case {test_case}/{self.total_tests}...")
         
         if self.test_mode == 'function_call':
             result, needs_semantic_check = self._evaluate_function_call(record, model_response, test_case, user_query)
-            result['run_type'] = run_type  # Add run_type to result
+            result['run_type'] = run_type
             
             if needs_semantic_check:
                 expected_call = record['assistant_response']['function_call']
                 model_call = model_response.get('model_function_call')
                 differences = self._get_function_call_differences(expected_call, model_call)
                 
-                # Run semantic evaluations in parallel
                 semantic_tasks = []
                 for param, (expected_val, model_val) in differences['param_values'].items():
                     task = self._evaluate_semantic_equivalence(
@@ -404,36 +420,65 @@ class Evaluator:
                 'detailed_result': result
             }
         else:
-            result, needs_semantic_check = self._evaluate_text_response(record, model_response, test_case, user_query)
-            result['run_type'] = run_type
+            # Get the expected and actual responses
+            expected_response = record['assistant_response']['content']
             
+            # Extract model response, handling different response formats
+            if isinstance(model_response, dict):
+                model_text = (
+                    model_response.get('model_response') or
+                    model_response.get('text') or
+                    model_response.get('content', '')
+                ).strip()
+            else:
+                model_text = str(model_response).strip()
+
+            # Create the result dictionary
+            result = {
+                'test_case': test_case,
+                'user_query': user_query,
+                'expected_response': expected_response,
+                'model_response': model_text,
+                'result': 'Incorrect',  # Default to incorrect
+                'reason': 'Responses are semantically different',  # Default reason
+                'run_type': run_type
+            }
+
+            # Check for exact match first
+            is_exact_match = expected_response.strip().lower() == model_text.strip().lower()
+            needs_semantic_check = not is_exact_match and self.model is not None
+
+            if is_exact_match:
+                result['result'] = 'Correct'
+                result.pop('reason', None)
+                return {
+                    'is_correct': True,
+                    'detailed_result': result
+                }
+
             if needs_semantic_check:
-                expected_text = record['assistant_response']['content']
-                model_text = model_response.get('model_response', '')
-                
                 semantic_result = await self._evaluate_semantic_equivalence(
                     user_query,
-                    expected_text,
+                    expected_response,
                     model_text,
                     test_case
                 )
                 
                 if semantic_result['is_semantically_equivalent']:
                     result['result'] = 'Correct'
-                    result.pop('reason', None)  # Remove reason if correct
+                    result.pop('reason', None)
                     is_correct = True
                 else:
                     is_correct = False
-                    result['reason'] = 'Responses are semantically different'  # Use simplified reason
-                
+
                 return {
                     'is_correct': is_correct,
                     'detailed_result': result,
                     'semantic_comparisons': [semantic_result]
                 }
-            
+
             return {
-                'is_correct': result['result'] == 'Correct',
+                'is_correct': False,
                 'detailed_result': result
             }
 
