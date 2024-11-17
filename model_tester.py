@@ -32,12 +32,11 @@ class ModelTester:
         """Process a single test case"""
         test_case = index + 1
         user_query = record['user_query']
-        logger.info(f"\nProcessing test case {test_case}/{len(self.test_dataset)}")
+        logger.info(f"Processing test case {test_case}/{len(self.test_dataset)}")
         
         try:
             # Get the full prompt that will be sent to the model
             full_prompt = await self.model.get_full_prompt(user_query, use_tools=use_tools)
-            logger.debug(f"Full prompt: {full_prompt}")
             
             if self.test_mode == 'function_call':
                 response = await self.model.generate_response(
@@ -45,7 +44,6 @@ class ModelTester:
                     use_tools=use_tools,
                     tool=self.tool
                 )
-                logger.debug(f"Full response: {response}")
                 
                 result = {
                     'test_case': test_case,

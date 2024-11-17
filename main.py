@@ -26,6 +26,8 @@ from vertexai.generative_models import (
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.MaxRetryError)
 logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
+logging.getLogger('google.auth.transport.requests').setLevel(logging.ERROR)
+logging.getLogger('google.oauth2').setLevel(logging.ERROR)
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
