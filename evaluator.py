@@ -47,12 +47,28 @@ class Evaluator:
                 
         return True
 
+    def _are_values_equivalent(self, val1, val2):
+        """Compare two values accounting for case and number format differences"""
+        # Convert to strings for comparison
+        str1 = str(val1).strip()
+        str2 = str(val2).strip()
+        
+        # Try numeric comparison first
+        try:
+            num1 = float(str1)
+            num2 = float(str2)
+            return abs(num1 - num2) < 1e-10  # Using small epsilon for float comparison
+        except (ValueError, TypeError):
+            # If not numbers, compare strings case-insensitively
+            return str1.lower() == str2.lower()
+
     def _get_function_call_differences(self, expected_call, model_call):
         """Get detailed differences between function calls"""
         differences = {
             'name_mismatch': False,
             'param_differences': [],
-            'param_values': {}
+            'param_values': {},
+            'needs_semantic_check': False
         }
         
         # Check function name
@@ -67,15 +83,18 @@ class Evaluator:
         for key in expected_args:
             if key not in model_args:
                 differences['param_differences'].append(f"Missing parameter: {key}")
-            elif str(expected_args[key]) != str(model_args[key]):
+                differences['needs_semantic_check'] = True
+            elif not self._are_values_equivalent(expected_args[key], model_args[key]):
                 differences['param_differences'].append(
                     f"{key}: expected '{expected_args[key]}', got '{model_args[key]}'"
                 )
                 differences['param_values'][key] = (expected_args[key], model_args[key])
+                differences['needs_semantic_check'] = True
                 
         for key in model_args:
             if key not in expected_args:
                 differences['param_differences'].append(f"Unexpected parameter: {key}")
+                differences['needs_semantic_check'] = True
                 
         return differences
 
