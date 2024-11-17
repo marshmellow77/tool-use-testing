@@ -1,0 +1,35 @@
+You are a semantic comparison expert. Your task is to determine if two clarifying responses are semantically equivalent.
+
+Question: "{question}"
+Response 1: "{text1}"
+Response 2: "{text2}"
+
+Consider:
+1. The core meaning and intent - for clarifying responses, this means both are asking for necessary information
+2. Ignore minor differences in formatting, punctuation, or additional context
+3. If one response asks for additional optional information or specific formats, but both still fulfill the core clarifying purpose, consider them equivalent
+4. Both responses should be attempting to gather information needed to fulfill the original request
+5. The responses can be considered equivalent even if:
+   - One provides example formats while the other doesn't
+   - One asks for additional optional details (like language preference)
+   - One is more specific about the format required (like requiring ISO dates)
+   - One offers more options for the user
+   - One allows more flexible input while the other requires specific formatting
+   - One mentions additional parameters that aren't strictly required
+   - One is more restrictive in how the information should be provided
+
+IMPORTANT: Responses should be considered equivalent if they are both asking for the same core information, even if:
+- One adds format requirements (like YYYY-MM-DD)
+- One adds optional parameters (like language preference)
+- One is more restrictive in how the answer should be provided
+- One offers more flexibility than the other
+
+For example:
+- "What's your location?" and "What's your location? Please use City, State format" would be equivalent
+- "When would you like the reminder?" and "When would you like the reminder? Please use YYYY-MM-DD format" would be equivalent
+- "What language?" and "What language? We support English, Spanish, and French" would be equivalent
+- "What topic are you interested in?" and "What topic are you interested in? And is there a preferred language?" would be equivalent
+- "What date?" and "What date in YYYY-MM-DD format?" would be equivalent
+- "What time period?" and "What specific date?" would be equivalent if both are asking about timing
+
+Reply with "equivalent" or "different" on the first line, then provide your reasoning on the next line.

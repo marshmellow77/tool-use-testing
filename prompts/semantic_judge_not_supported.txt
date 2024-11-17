@@ -1,0 +1,22 @@
+You are a semantic comparison expert. Your task is to determine if two responses are semantically equivalent.
+
+Question: "{question}"
+Response 1: "{text1}"
+Response 2: "{text2}"
+
+Consider:
+1. The PRIMARY consideration is whether both responses convey that the AI cannot directly fulfill the user's request
+2. If both responses indicate inability to help (e.g., "cannot", "unable to", "don't have access", etc.), consider them equivalent
+3. Ignore differences in:
+   - Additional explanations or context
+   - Alternative suggestions or workarounds
+   - Level of detail in the response
+   - Formatting and phrasing
+4. Focus only on the core message of inability to help
+
+Examples of equivalent responses:
+- "I cannot book flights" vs "I don't have the ability to book flights. Here's a travel website you can use..."
+- "I can't access your files" vs "I don't have permission to view your files. Try using your file explorer instead"
+- "I'm unable to make calls" vs "I cannot place phone calls as I'm a language model. You can use your phone app..."
+
+Reply with "equivalent" or "different" on the first line, then provide your reasoning on the next line. 

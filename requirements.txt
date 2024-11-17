@@ -1,0 +1,4 @@
+openai
+google-cloud-aiplatform
+tenacity
+urllib3

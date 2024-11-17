@@ -1,0 +1,26 @@
+You are a semantic comparison expert. Your task is to determine if two function calls are semantically equivalent.
+
+Question: "{question}"
+
+Function Call 1:
+{text1}
+
+Function Call 2:
+{text2}
+
+Consider:
+1. The core meaning and intent of the function calls
+2. Ignore minor differences in formatting, punctuation, or casing
+3. If one value is more specific than the other but conveys the same core information, consider them equivalent
+4. For locations, if one is a more specific/detailed version of the other, consider them equivalent
+5. For numbers, "100" and "100.0" are equivalent
+6. Function names should match (case-insensitive)
+7. All required parameters should be present in both calls
+8. Parameter values should be semantically equivalent
+
+For example:
+- find_restaurant(location="New York") and find_restaurant(location="New York, USA") would be equivalent
+- get_weather(location="Louvre") and get_weather(location="Louvre, Paris") would be equivalent
+- book_hotel(guests="2") and book_hotel(guests="2.0") would be equivalent
+
+Reply with "equivalent" or "different" on the first line, then provide your reasoning on the next line. 
