@@ -48,6 +48,9 @@ async def main():
     parser.add_argument('--openai-api-key', help='OpenAI API key')
     parser.add_argument('--semantic-judge-model', default='gpt-4', help='Model name for semantic judge')
     parser.add_argument('--semantic-judge-prompt', help='Path to semantic judge prompt file')
+    parser.add_argument('--run-both-tool-modes', 
+                       action='store_true',
+                       help='In no_function mode, run both with and without tools')
     args = parser.parse_args()
 
     logger.info(f"\nStarting test run with {args.model_type} model in {args.mode} mode")
@@ -83,8 +86,33 @@ async def main():
     )
 
     # Step 1: Run tests and get raw results
-    raw_results = await tester.run_tests(use_tools=(args.mode == 'function_call'))
-    
+    if args.mode == 'no_function' and args.run_both_tool_modes:
+        # Run tests without tools
+        logger.info("\n=== Running tests WITHOUT tools ===")
+        no_tools_results = await tester.run_tests(use_tools=False)
+        
+        # Run tests with tools
+        logger.info("\n=== Running tests WITH tools ===")
+        with_tools_results = await tester.run_tests(use_tools=True)
+        
+        # Combine results
+        raw_results = {
+            'no_tools': {
+                'test_dataset': test_dataset,
+                'model_responses': no_tools_results['model_responses'],
+                'test_mode': args.mode,
+                'run_type': 'no_tools'
+            },
+            'with_tools': {
+                'test_dataset': test_dataset,
+                'model_responses': with_tools_results['model_responses'],
+                'test_mode': args.mode,
+                'run_type': 'with_tools'
+            }
+        }
+    else:
+        raw_results = await tester.run_tests(use_tools=(args.mode == 'function_call'))
+
     # Create results directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_dir = os.path.join("results", f"test_run_{timestamp}")
@@ -99,7 +127,8 @@ async def main():
     evaluator = Evaluator(
         test_mode=args.mode,
         semantic_judge_model_name=args.semantic_judge_model,
-        semantic_judge_prompt=args.semantic_judge_prompt
+        semantic_judge_prompt=args.semantic_judge_prompt,
+        run_both_tool_modes=args.run_both_tool_modes
     )
     evaluation_results = await evaluator.evaluate_results(raw_results)
     
@@ -107,7 +136,17 @@ async def main():
     evaluator.save_results(results_dir)
 
     # Log summary
-    logger.info(f"""
+    if args.mode == 'no_function' and args.run_both_tool_modes:
+        for run_type, results in evaluation_results.items():
+            logger.info(f"""
+Evaluation Summary ({run_type}):
+Total test cases: {results['total_tests']}
+Correct predictions: {results['correct_predictions']}
+Incorrect predictions: {results['incorrect_predictions']}
+Accuracy: {results['accuracy']:.2f}%
+""")
+    else:
+        logger.info(f"""
 Evaluation Summary:
 Total test cases: {evaluation_results['total_tests']}
 Correct predictions: {evaluation_results['correct_predictions']}

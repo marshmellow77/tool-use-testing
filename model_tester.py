@@ -137,3 +137,76 @@ class ModelTester:
             'model_responses': model_responses,
             'test_mode': self.test_mode
         }
+
+    # async def _process_no_function_record(self, record, index, use_tools=False):
+    #     """Process a test record in no-function mode"""
+    #     try:
+    #         user_prompt = Content(
+    #             role="user",
+    #             parts=[Part.from_text(record['user_query'])]
+    #         )
+
+    #         # Conditionally include tools
+    #         tools = [self.tool] if use_tools else None
+    #         tool_config = (
+    #             ToolConfig(
+    #                 function_calling_config=ToolConfig.FunctionCallingConfig(
+    #                     mode=ToolConfig.FunctionCallingConfig.Mode.AUTO
+    #                 )
+    #             )
+    #         ) if use_tools else None
+
+    #         response = await self.call_model_with_retry(
+    #             self.model,
+    #             user_prompt,
+    #             generation_config=self.generation_config,
+    #             tools=tools,
+    #             tool_config=tool_config
+    #         )
+
+    #         # Check for function calls first
+    #         if (hasattr(response, 'candidates') and 
+    #             response.candidates and 
+    #             hasattr(response.candidates[0], 'content') and 
+    #             hasattr(response.candidates[0].content, 'parts')):
+                
+    #             parts = response.candidates[0].content.parts
+    #             if parts and hasattr(parts[0], 'function_call'):
+    #                 # Model made a function call when it shouldn't have
+    #                 return {
+    #                     'test_case': index + 1,
+    #                     'user_query': record['user_query'],
+    #                     'expected_response': record['assistant_response']['content'],
+    #                     'model_response': f"Made function call: {parts[0].function_call.name}",
+    #                     'result': 'Incorrect',
+    #                     'reason': 'Model made a function call when it should not have',
+    #                     'run_type': 'with_tools' if use_tools else 'no_tools'
+    #                 }
+
+    #             # If no function call, try to get text
+    #             if parts and hasattr(parts[0], 'text'):
+    #                 model_text = parts[0].text
+    #             else:
+    #                 model_text = "No text response available"
+    #         else:
+    #             model_text = getattr(response, 'text', 'No text response available')
+
+    #         return {
+    #             'test_case': index + 1,
+    #             'user_query': record['user_query'],
+    #             'expected_response': record['assistant_response']['content'],
+    #             'model_response': model_text,
+    #             'run_type': 'with_tools' if use_tools else 'no_tools'
+    #         }
+
+    #     except Exception as e:
+    #         logger.error(f"Error in test case {index + 1}: {str(e)}")
+    #         return {
+    #             'test_case': index + 1,
+    #             'user_query': record['user_query'],
+    #             'expected_response': record['assistant_response']['content'],
+    #             'model_response': f"Error: {str(e)}",
+    #             'result': 'Incorrect',
+    #             'reason': str(e),
+    #             'run_type': 'with_tools' if use_tools else 'no_tools'
+    #         }
