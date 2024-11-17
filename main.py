@@ -123,6 +123,22 @@ async def main():
     results_dir = os.path.join("results", f"test_run_{timestamp}")
     os.makedirs(results_dir, exist_ok=True)
 
+    # Save test parameters
+    test_parameters = {
+        "timestamp": timestamp,
+        "test_mode": args.mode,
+        "dataset_path": args.dataset,
+        "function_call_model_id": args.gemini_model_id if args.model_type == 'gemini' else args.openai_model_name,
+        "semantic_judge_model_id": args.semantic_judge_model,
+        "generation_config": {
+            "temperature": 0.0
+        }
+    }
+    
+    parameters_file = os.path.join(results_dir, "test_parameters.json")
+    with open(parameters_file, 'w') as f:
+        json.dump(test_parameters, f, indent=2)
+
     # Save raw results
     raw_results_file = os.path.join(results_dir, "raw_responses.json")
     with open(raw_results_file, 'w') as f:
