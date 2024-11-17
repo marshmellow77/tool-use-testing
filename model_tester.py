@@ -99,32 +99,8 @@ class ModelTester:
                             'total_token_count': response.usage_metadata.total_token_count
                         }
             else:  # OpenAI model
-                print(response)
-                response_dict = {
-                    'model_response': {
-                        'candidates': [{
-                            'content': {
-                                'role': 'assistant',
-                                'parts': []
-                            }
-                        }]
-                    }
-                }
-                
-                # Handle function calls
-                if response.get('model_function_call'):
-                    response_dict['model_response']['candidates'][0]['content']['parts'].append({
-                        'function_call': {
-                            'name': response['model_function_call']['name'],
-                            'args': response['model_function_call']['arguments']
-                        }
-                    })
-                
-                # Handle text responses
-                if response.get('full_model_response'):
-                    response_dict['model_response']['candidates'][0]['content']['parts'].append({
-                        'text': response['full_model_response']
-                    })
+                response_dict = {}
+                response_dict["model_response"] = response
 
             return index, response_dict
 

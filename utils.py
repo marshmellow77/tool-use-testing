@@ -17,15 +17,18 @@ async def process_raw_responses(raw_responses_file, model_instance):
             'model_text': None
         }
 
-        if 'model_response' in record and record['model_response']:
+        # Check if we have a model response
+        if 'model_response' in record:
+            response = record['model_response']
+            
             if isinstance(model_instance, GeminiModel):
-                response = record['model_response']
+                # Process Gemini response
                 if 'candidates' in response and response['candidates']:
-                    candidate = response['candidates'][0]  # Get first candidate
+                    candidate = response['candidates'][0]
                     if 'content' in candidate and 'parts' in candidate['content']:
                         parts = candidate['content']['parts']
-                        if parts:  # If there are parts
-                            part = parts[0]  # Get first part
+                        if parts:
+                            part = parts[0]
                             if 'function_call' in part:
                                 function_call = part['function_call']
                                 processed_record['model_function_call'] = {
@@ -34,24 +37,13 @@ async def process_raw_responses(raw_responses_file, model_instance):
                                 }
                             elif 'text' in part:
                                 processed_record['model_text'] = part['text']
-            
-            else:  # OpenAI model
-                response = record['model_response']
-                if 'model_function_call' in response and response['model_function_call']:
-                    function_call = response['model_function_call']
-                    try:
-                        arguments = (function_call['arguments'] 
-                                   if isinstance(function_call['arguments'], dict)
-                                   else json.loads(function_call['arguments']))
-                    except (json.JSONDecodeError, TypeError):
-                        arguments = {}
-                    
-                    processed_record['model_function_call'] = {
-                        'name': function_call['name'],
-                        'arguments': arguments
-                    }
-                else:
-                    processed_record['model_text'] = response['model_response']
+            else:
+                # Process OpenAI response
+                # OpenAI responses are already in the correct format from models.py
+                processed_record['model_function_call'] = response.get('model_function_call')
+                processed_record['model_text'] = response.get('full_model_response')
+                # if 'error' in response:
+                #     processed_record['error'] = response.get('error')
         
         processed_results.append(processed_record)
     

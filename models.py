@@ -42,20 +42,22 @@ class OpenAIModel(LLMModel):
 
         try:
             if use_tools and tool:
-                tools = [{
-                    "type": "function",
-                    "function": {
-                        "name": tool["name"],
-                        "description": tool["description"],
-                        "parameters": tool["parameters"]
-                    }
-                }]
+                tools = []
+                for t in tool:
+                    tools.append({
+                        "type": "function",
+                        "function": {
+                            "name": t["name"],
+                            "description": t["description"],
+                            "parameters": t["parameters"]
+                        }
+                    })
                 
                 response = await self.client.chat.completions.create(
                     model=self.model_name,
                     messages=messages,
                     tools=tools,
-                    tool_choice={"type": "function", "function": {"name": tool["name"]}},
+                    tool_choice="auto",
                     temperature=self.temperature,
                 )
                 
