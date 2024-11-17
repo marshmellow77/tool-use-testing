@@ -1,7 +1,8 @@
 [
   {
+    "id": "A001",
     "user_query": "What's the weather like in New York?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_weather",
         "arguments": {
@@ -11,8 +12,9 @@
     }
   },
   {
+    "id": "A002",
     "user_query": "Find me the fastest driving route from Los Angeles to San Francisco.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "calculate_route",
         "arguments": {
@@ -24,8 +26,9 @@
     }
   },
   {
+    "id": "A003",
     "user_query": "Translate 'Good morning' into French.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "translate_text",
         "arguments": {
@@ -36,8 +39,9 @@
     }
   },
   {
+    "id": "A004",
     "user_query": "Book a hotel in Paris from March 20, 2024 to March 25, 2024 for two people.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "book_hotel",
         "arguments": {
@@ -50,8 +54,9 @@
     }
   },
   {
+    "id": "A005",
     "user_query": "What's the current stock price of TSLA?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_stock_price",
         "arguments": {
@@ -61,8 +66,9 @@
     }
   },
   {
+    "id": "A006",
     "user_query": "Remind me to call the doctor at 3 PM on 16th July 2024.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "set_reminder",
         "arguments": {
@@ -73,8 +79,9 @@
     }
   },
   {
+    "id": "A007",
     "user_query": "Find me a good sushi place in Toronto.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "find_restaurant",
         "arguments": {
@@ -85,8 +92,9 @@
     }
   },
   {
+    "id": "A008",
     "user_query": "Convert 100 miles to kilometers.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "convert_units",
         "arguments": {
@@ -98,8 +106,9 @@
     }
   },
   {
+    "id": "A009",
     "user_query": "Show me the latest sports news.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_news_headlines",
         "arguments": {
@@ -109,8 +118,9 @@
     }
   },
   {
+    "id": "A010",
     "user_query": "Email sarah@example.com to confirm our meeting on March 15, 2024.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "send_email",
         "arguments": {
@@ -122,8 +132,9 @@
     }
   },
   {
+    "id": "A011",
     "user_query": "What's the current time in Tokyo?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_current_time",
         "arguments": {
@@ -133,8 +144,9 @@
     }
   },
   {
+    "id": "A012",
     "user_query": "What's the definition of 'quintessential'?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "lookup_definition",
         "arguments": {
@@ -144,8 +156,9 @@
     }
   },
   {
+    "id": "A013",
     "user_query": "I need to find a cheap Italian restaurant in New York.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "find_restaurant",
         "arguments": {
@@ -157,8 +170,9 @@
     }
   },
   {
+    "id": "A014",
     "user_query": "What's on my calendar for 19 November 2023?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_calendar_events",
         "arguments": {
@@ -168,8 +182,9 @@
     }
   },
   {
+    "id": "A015",
     "user_query": "How's the traffic from Shoreditch to the Heathrow airport?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "check_traffic",
         "arguments": {
@@ -179,8 +194,9 @@
     }
   },
   {
+    "id": "A016",
     "user_query": "Solve for x: 2x + 3 = 7.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "solve_math_problem",
         "arguments": {
@@ -190,8 +206,9 @@
     }
   },
   {
+    "id": "A017",
     "user_query": "What's Apple's stock price today?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_stock_price",
         "arguments": {
@@ -201,8 +218,9 @@
     }
   },
   {
+    "id": "A018",
     "user_query": "Translate 'Thank you' into Japanese.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "translate_text",
         "arguments": {
@@ -213,8 +231,9 @@
     }
   },
   {
+    "id": "A019",
     "user_query": "What time is it in Sydney?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_current_time",
         "arguments": {
@@ -224,8 +243,9 @@
     }
   },
   {
+    "id": "A020",
     "user_query": "How many feet are in 3 meters?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "convert_units",
         "arguments": {
@@ -237,8 +257,9 @@
     }
   },
   {
+    "id": "A021",
     "user_query": "Set a reminder to buy groceries at 5 PM on 12 November 2024.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "set_reminder",
         "arguments": {
@@ -249,8 +270,9 @@
     }
   },
   {
+    "id": "A022",
     "user_query": "Is it raining in London right now?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_weather",
         "arguments": {
@@ -260,8 +282,9 @@
     }
   },
   {
+    "id": "A023",
     "user_query": "Find a Mexican restaurant in San Diego.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "find_restaurant",
         "arguments": {
@@ -272,8 +295,9 @@
     }
   },
   {
+    "id": "A024",
     "user_query": "Give me the latest news in technology.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_news_headlines",
         "arguments": {
@@ -283,8 +307,9 @@
     }
   },
   {
+    "id": "A025",
     "user_query": "Plan a walking route from Central Park to Times Square.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "calculate_route",
         "arguments": {
@@ -296,8 +321,9 @@
     }
   },
   {
+    "id": "A026",
     "user_query": "Define 'effervescent'.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "lookup_definition",
         "arguments": {
@@ -307,8 +333,9 @@
     }
   },
   {
+    "id": "A027",
     "user_query": "What's the stock price of GOOGL?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_stock_price",
         "arguments": {
@@ -318,8 +345,9 @@
     }
   },
   {
+    "id": "A028",
     "user_query": "Translate 'Where is the train station?' into German.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "translate_text",
         "arguments": {
@@ -330,8 +358,9 @@
     }
   },
   {
+    "id": "A029",
     "user_query": "Do I have any meetings on 15 November 2024?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_calendar_events",
         "arguments": {
@@ -341,8 +370,9 @@
     }
   },
   {
+    "id": "A030",
     "user_query": "What is the derivative of x^2?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "solve_math_problem",
         "arguments": {
@@ -352,8 +382,9 @@
     }
   },
   {
+    "id": "A031",
     "user_query": "Is it sunny in Miami?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_weather",
         "arguments": {
@@ -363,8 +394,9 @@
     }
   },
   {
+    "id": "A032",
     "user_query": "Remind me to water the plants on 27 March 2024 at 8 AM.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "set_reminder",
         "arguments": {
@@ -375,8 +407,9 @@
     }
   },
   {
+    "id": "A033",
     "user_query": "What does 'serendipity' mean?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "lookup_definition",
         "arguments": {
@@ -386,8 +419,9 @@
     }
   },
   {
+    "id": "A034",
     "user_query": "What's the current weather for Chicago?",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "get_weather",
         "arguments": {
@@ -397,8 +431,9 @@
     }
   },
   {
+    "id": "A035",
     "user_query": "Find me a sushi restaurant within walking distance of the Louvre that's in the moderate price range.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "find_restaurant",
         "arguments": {
@@ -410,8 +445,9 @@
     }
   },
   {
+    "id": "A036",
     "user_query": "Calculate a scenic walking route from Westminster Abbey to Tower Bridge that passes by the Thames River.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "calculate_route",
         "arguments": {
@@ -423,8 +459,9 @@
     }
   },
   {
+    "id": "A037",
     "user_query": "Send a detailed email to team@company.com explaining that I'll be 15 minutes late to tomorrow's quarterly budget review meeting due to a doctor's appointment.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "send_email",
         "arguments": {
@@ -436,8 +473,9 @@
     }
   },
   {
+    "id": "A038",
     "user_query": "Set a reminder for taking my heart medication on 19 March 2024 at 8 AM.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "set_reminder",
         "arguments": {
@@ -448,8 +486,9 @@
     }
   },
   {
+    "id": "A039",
     "user_query": "Solve the indefinite integral of 3x²sin(x) + 4x√(x-1) with respect to x.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "solve_math_problem",
         "arguments": {
@@ -459,8 +498,9 @@
     }
   },
   {
+    "id": "A040",
     "user_query": "Check the rush hour traffic conditions along the M25 orbital, specifically between Heathrow and Dartford Crossing.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "check_traffic",
         "arguments": {
@@ -470,8 +510,9 @@
     }
   },
   {
-    "user_query": "Book a hotel suite in Santorini  for a honeymoon stay from 15 September 2024 to 22 September 2024.",
-    "assistant_response": {
+    "id": "A041",
+    "user_query": "Book a hotel suite in Santorini for a honeymoon stay from 15 September 2024 to 22 September 2024.",
+    "ground_truth": {
       "function_call": {
         "name": "book_hotel",
         "arguments": {
@@ -484,8 +525,9 @@
     }
   },
   {
+    "id": "A042",
     "user_query": "Convert 98.6°F to Celsius for my thermodynamics lab report.",
-    "assistant_response": {
+    "ground_truth": {
       "function_call": {
         "name": "convert_units",
         "arguments": {

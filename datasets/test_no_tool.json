@@ -1,197 +1,225 @@
 [
     {
+        "id": "B001",
         "user_query": "What is the capital of France?",
-        "assistant_response": {
-            "content": "The capital of France is Paris.",
+        "ground_truth": {
+            "text": "The capital of France is Paris.",
             "no_function_call": true
         }
     },
     {
+        "id": "B002",
         "user_query": "Who wrote Romeo and Juliet?",
-        "assistant_response": {
-            "content": "Romeo and Juliet was written by William Shakespeare.",
+        "ground_truth": {
+            "text": "Romeo and Juliet was written by William Shakespeare.",
             "no_function_call": true
         }
     },
     {
+        "id": "B003",
         "user_query": "What is the chemical symbol for gold?",
-        "assistant_response": {
-            "content": "The chemical symbol for gold is Au.",
+        "ground_truth": {
+            "text": "The chemical symbol for gold is Au.",
             "no_function_call": true
         }
     },
     {
+        "id": "B004",
         "user_query": "Who was the first person to walk on the moon?",
-        "assistant_response": {
-            "content": "Neil Armstrong was the first person to walk on the moon on July 20, 1969.",
+        "ground_truth": {
+            "text": "Neil Armstrong was the first person to walk on the moon on July 20, 1969.",
             "no_function_call": true
         }
     },
     {
+        "id": "B005",
         "user_query": "What is the speed of light?",
-        "assistant_response": {
-            "content": "The speed of light in a vacuum is approximately 299,792,458 meters per second.",
+        "ground_truth": {
+            "text": "The speed of light in a vacuum is approximately 299,792,458 meters per second.",
             "no_function_call": true
         }
     },
     {
+        "id": "B006",
         "user_query": "Who painted the Mona Lisa?",
-        "assistant_response": {
-            "content": "The Mona Lisa was painted by Leonardo da Vinci.",
+        "ground_truth": {
+            "text": "The Mona Lisa was painted by Leonardo da Vinci.",
             "no_function_call": true
         }
     },
     {
+        "id": "B007",
         "user_query": "What is the largest planet in our solar system?",
-        "assistant_response": {
-            "content": "Jupiter is the largest planet in our solar system.",
+        "ground_truth": {
+            "text": "Jupiter is the largest planet in our solar system.",
             "no_function_call": true
         }
     },
     {
+        "id": "B008",
         "user_query": "Who invented the telephone?",
-        "assistant_response": {
-            "content": "Alexander Graham Bell invented the telephone in 1876.",
+        "ground_truth": {
+            "text": "Alexander Graham Bell invented the telephone in 1876.",
             "no_function_call": true
         }
     },
     {
+        "id": "B009",
         "user_query": "What is the chemical formula for water?",
-        "assistant_response": {
-            "content": "The chemical formula for water is H2O.",
+        "ground_truth": {
+            "text": "The chemical formula for water is H2O.",
             "no_function_call": true
         }
     },
     {
+        "id": "B010",
         "user_query": "What is the capital of Japan?",
-        "assistant_response": {
-            "content": "The capital of Japan is Tokyo.",
+        "ground_truth": {
+            "text": "The capital of Japan is Tokyo.",
             "no_function_call": true
         }
     },
     {
-        "user_query": "How many bones are in the adulthuman body?",
-        "assistant_response": {
-            "content": "The adult human body has 206 bones.",
+        "id": "B011",
+        "user_query": "How many bones are in the adult human body?",
+        "ground_truth": {
+            "text": "The adult human body has 206 bones.",
             "no_function_call": true
         }
     },
     {
+        "id": "B012",
         "user_query": "What planet is known as the Red Planet?",
-        "assistant_response": {
-            "content": "Mars is known as the Red Planet.",
+        "ground_truth": {
+            "text": "Mars is known as the Red Planet.",
             "no_function_call": true
         }
     },
     {
+        "id": "B013",
         "user_query": "What is the main ingredient in guacamole?",
-        "assistant_response": {
-            "content": "The main ingredient in guacamole is avocado.",
+        "ground_truth": {
+            "text": "The main ingredient in guacamole is avocado.",
             "no_function_call": true
         }
     },
     {
+        "id": "B014",
         "user_query": "How many sides does a hexagon have?",
-        "assistant_response": {
-            "content": "A hexagon has six sides.",
+        "ground_truth": {
+            "text": "A hexagon has six sides.",
             "no_function_call": true
         }
     },
     {
+        "id": "B015",
         "user_query": "What is the primary language spoken in Brazil?",
-        "assistant_response": {
-            "content": "The primary language spoken in Brazil is Portuguese.",
+        "ground_truth": {
+            "text": "The primary language spoken in Brazil is Portuguese.",
             "no_function_call": true
         }
     },
     {
+        "id": "B016",
         "user_query": "What is the hardest natural substance on Earth?",
-        "assistant_response": {
-            "content": "Diamond is the hardest natural substance on Earth.",
+        "ground_truth": {
+            "text": "Diamond is the hardest natural substance on Earth.",
             "no_function_call": true
         }
     },
     {
+        "id": "B017",
         "user_query": "Which animal is known as the King of the Jungle?",
-        "assistant_response": {
-            "content": "The lion is known as the King of the Jungle.",
+        "ground_truth": {
+            "text": "The lion is known as the King of the Jungle.",
             "no_function_call": true
         }
     },
     {
+        "id": "B018",
         "user_query": "What is the largest desert in the world?",
-        "assistant_response": {
-            "content": "The Antarctic Desert is the largest desert in the world.",
+        "ground_truth": {
+            "text": "The Antarctic Desert is the largest desert in the world.",
             "no_function_call": true
         }
     },
     {
+        "id": "B019",
         "user_query": "Who was the first woman to win a Nobel Prize?",
-        "assistant_response": {
-            "content": "Marie Curie was the first woman to win a Nobel Prize, receiving it in Physics in 1903.",
+        "ground_truth": {
+            "text": "Marie Curie was the first woman to win a Nobel Prize, receiving it in Physics in 1903.",
             "no_function_call": true
         }
     },
     {
+        "id": "B020",
         "user_query": "How many chromosomes do humans have?",
-        "assistant_response": {
-            "content": "Humans have 23 pairs of chromosomes, for a total of 46 chromosomes.",
+        "ground_truth": {
+            "text": "Humans have 23 pairs of chromosomes, for a total of 46 chromosomes.",
             "no_function_call": true
         }
     },
     {
+        "id": "B021",
         "user_query": "What is the longest river in the world?",
-        "assistant_response": {
-            "content": "The Nile River is the longest river in the world.",
+        "ground_truth": {
+            "text": "The Nile River is the longest river in the world.",
             "no_function_call": true
         }
     },
     {
+        "id": "B022",
         "user_query": "What is the main component of the Sun?",
-        "assistant_response": {
-            "content": "The main component of the Sun is hydrogen.",
+        "ground_truth": {
+            "text": "The main component of the Sun is hydrogen.",
             "no_function_call": true
         }
     },
     {
+        "id": "B023",
         "user_query": "Which is the smallest bird in the world?",
-        "assistant_response": {
-            "content": "The Bee Hummingbird is the smallest bird in the world.",
+        "ground_truth": {
+            "text": "The Bee Hummingbird is the smallest bird in the world.",
             "no_function_call": true
         }
     },
     {
+        "id": "B024",
         "user_query": "What is the most abundant element in Earth's atmosphere?",
-        "assistant_response": {
-            "content": "Nitrogen is the most abundant element in Earth's atmosphere.",
+        "ground_truth": {
+            "text": "Nitrogen is the most abundant element in Earth's atmosphere.",
             "no_function_call": true
         }
     },
     {
+        "id": "B025",
         "user_query": "What is the Great Wall of China made of?",
-        "assistant_response": {
-            "content": "The Great Wall of China is primarily made of stone, brick, wood, and rammed earth.",
+        "ground_truth": {
+            "text": "The Great Wall of China is primarily made of stone, brick, wood, and rammed earth.",
             "no_function_call": true
         }
     },
     {
+        "id": "B026",
         "user_query": "Which instrument has 88 keys?",
-        "assistant_response": {
-            "content": "A standard piano has 88 keys.",
+        "ground_truth": {
+            "text": "A standard piano has 88 keys.",
             "no_function_call": true
         }
     },
     {
+        "id": "B027",
         "user_query": "What is the study of fossils called?",
-        "assistant_response": {
-            "content": "The study of fossils is called paleontology.",
+        "ground_truth": {
+            "text": "The study of fossils is called paleontology.",
             "no_function_call": true
         }
     },
     {
+        "id": "B028",
         "user_query": "What is the human body's largest organ?",
-        "assistant_response": {
-            "content": "The skin is the human body's largest organ.",
+        "ground_truth": {
+            "text": "The skin is the human body's largest organ.",
             "no_function_call": true
         }
     }

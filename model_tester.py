@@ -10,6 +10,7 @@ from vertexai.generative_models import (
     Part
 )
 from models import GeminiModel
+from google.protobuf.json_format import MessageToDict
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -28,40 +29,16 @@ class ModelTester:
         logger.info(f"Initialized {len(self.tools) if isinstance(self.tools, list) else 'Gemini'} tools")
 
     async def process_test_case(self, index, record, use_tools):
-        """Process a single test case"""
+        """Process a single test case and return raw response"""
         test_case = index + 1
         user_query = record['user_query']
         
         logger.info(f"\nProcessing test case {test_case}/{len(self.test_dataset)}")
-        logger.info(f"User query: {user_query}")
         
         try:
-            # Get the expected function from the assistant_response
-            expected_function = None
-            if 'assistant_response' in record and 'function_call' in record['assistant_response']:
-                expected_function = record['assistant_response']['function_call']['name']
-            
-            logger.info(f"Expected function: {expected_function}")
-            logger.info(f"Use tools: {use_tools}")
-            
             current_tool = None
             if use_tools:
-                if self.test_mode == 'no_function':
-                    # Always provide tools in no_function mode if use_tools is True
-                    if isinstance(self.model, GeminiModel):
-                        current_tool = self.tools
-                    else:  # OpenAI
-                        current_tool = self.tools  # Pass all tools for OpenAI
-                elif expected_function:
-                    # In function_call mode, only pass the expected tool
-                    if isinstance(self.model, GeminiModel):
-                        current_tool = self.tools
-                    else:  # OpenAI
-                        current_tool = next(
-                            (tool for tool in self.tools 
-                             if tool["name"] == expected_function),
-                            None
-                        )
+                current_tool = self.tools  # Always provide all tools when use_tools is True
             
             response = await self.model.generate_response(
                 user_query, 
@@ -69,60 +46,92 @@ class ModelTester:
                 tool=current_tool
             )
             
-            result = {
-                'test_case': test_case,
-                'user_query': user_query,
-                'full_model_response': str(response),
-                'model_function_call': None,  # Will be updated if function call exists
-                'text': None  # Initialize text field
-            }
-            
-            # Extract function call based on model type
+            # Handle different model responses
             if isinstance(self.model, GeminiModel):
-                if (hasattr(response, 'candidates') and response.candidates and 
-                    hasattr(response.candidates[0], 'function_calls') and 
-                    response.candidates[0].function_calls):
+                try:
+                    response_dict = {'model_response': MessageToDict(response._pb)}
+                except (AttributeError, Exception) as e:
+                    # Fallback: manually construct the response structure
+                    response_dict = {
+                        'model_response': {
+                            'candidates': [],
+                            'usage_metadata': None
+                        }
+                    }
                     
-                    function_call = response.candidates[0].function_calls[0]
-                    result['model_function_call'] = {
-                        'name': function_call.name,
-                        'arguments': function_call.args
-                    }
-                else:
-                    # Extract text from Gemini response when no function call is made
-                    if hasattr(response, 'candidates') and response.candidates:
-                        result['text'] = response.candidates[0].content.parts[0].text
+                    if hasattr(response, 'candidates'):
+                        for candidate in response.candidates:
+                            candidate_dict = {
+                                'content': {
+                                    'role': candidate.content.role,
+                                    'parts': []
+                                },
+                                'finish_reason': candidate.finish_reason,
+                                'avg_logprobs': candidate.avg_logprobs
+                            }
+                            
+                            if hasattr(candidate.content, 'parts'):
+                                for part in candidate.content.parts:
+                                    part_dict = {}
+                                    # Handle text responses
+                                    if hasattr(part, 'text') and part.text is not None:
+                                        part_dict['text'] = part.text
+                                    # Handle function calls
+                                    if hasattr(part, 'function_call') and part.function_call is not None:
+                                        try:
+                                            part_dict['function_call'] = {
+                                                'name': part.function_call.name,
+                                                'args': part.function_call.args
+                                            }
+                                        except AttributeError:
+                                            # If function call exists but is malformed, skip it
+                                            pass
+                                    # Only append if we captured either text or function call
+                                    if part_dict:
+                                        candidate_dict['content']['parts'].append(part_dict)
+                            
+                            response_dict['model_response']['candidates'].append(candidate_dict)
+                    
+                    if hasattr(response, 'usage_metadata'):
+                        response_dict['model_response']['usage_metadata'] = {
+                            'prompt_token_count': response.usage_metadata.prompt_token_count,
+                            'candidates_token_count': response.usage_metadata.candidates_token_count,
+                            'total_token_count': response.usage_metadata.total_token_count
+                        }
             else:  # OpenAI model
-                if 'model_function_call' in response and response['model_function_call']:
-                    function_call = response['model_function_call']
-                    try:
-                        # Check if arguments is already a dict
-                        if isinstance(function_call['arguments'], dict):
-                            arguments = function_call['arguments']
-                        else:
-                            arguments = json.loads(function_call['arguments'])
-                    except (json.JSONDecodeError, TypeError):
-                        logger.error("Failed to parse function arguments")
-                        arguments = {}
-                    result['model_function_call'] = {
-                        'name': function_call['name'],
-                        'arguments': arguments
+                print(response)
+                response_dict = {
+                    'model_response': {
+                        'candidates': [{
+                            'content': {
+                                'role': 'assistant',
+                                'parts': []
+                            }
+                        }]
                     }
-                else:
-                    # Extract text from OpenAI response when no function call is made
-                    result['text'] = response['full_model_response']
-            
-            return index, result
-            
+                }
+                
+                # Handle function calls
+                if response.get('model_function_call'):
+                    response_dict['model_response']['candidates'][0]['content']['parts'].append({
+                        'function_call': {
+                            'name': response['model_function_call']['name'],
+                            'args': response['model_function_call']['arguments']
+                        }
+                    })
+                
+                # Handle text responses
+                if response.get('full_model_response'):
+                    response_dict['model_response']['candidates'][0]['content']['parts'].append({
+                        'text': response['full_model_response']
+                    })
+
+            return index, response_dict
+
         except Exception as e:
-            # logger.error(f"Error processing test case {test_case}: {str(e)}")
-            return index, {
-                'test_case': test_case,
-                'user_query': user_query,
-                'model_function_call': None,
-                'full_model_response': None,
-                'error': str(e)
-            }
+            logger.error(f"Error processing test case {test_case}: {str(e)}")
+            return index, {"error": str(e)}
+
 
     async def run_tests(self, use_tools=False):
         logger.info(f"\nStarting test execution with {len(self.test_dataset)} test cases")
@@ -142,8 +151,12 @@ class ModelTester:
         model_responses = [r[1] for r in sorted_responses]
 
         logger.info("\nAll test cases processed")
+        # Combine model responses with the test dataset
+        combined_results = [
+            {**record, **response}  # Combine dataset record with model response
+            for record, response in zip(self.test_dataset, model_responses)
+        ]
         return {
-            'test_dataset': self.test_dataset,
-            'model_responses': model_responses,
-            'test_mode': self.test_mode
+            'test_results': combined_results,  # Updated to include combined results
+            # 'model_responses': model_responses,  # Optional, if you still want to keep it
         }

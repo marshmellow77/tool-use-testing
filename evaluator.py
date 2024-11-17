@@ -29,12 +29,15 @@ class Evaluator:
             with open(semantic_judge_prompt, 'r') as f:
                 self.prompt_template = f.read()
 
-    def _are_function_calls_identical(self, expected_call, model_call):
+    def _are_function_calls_identical(self, ground_truth, model_call):
         """Check if two function calls are identical"""
-        if expected_call['name'].lower() != model_call['name'].lower():
+        if not model_call or not ground_truth:
             return False
             
-        expected_args = expected_call['arguments']
+        if ground_truth['name'].lower() != model_call['name'].lower():
+            return False
+            
+        expected_args = ground_truth['arguments']
         model_args = model_call['arguments']
         
         # Check if they have the same parameters
@@ -43,27 +46,12 @@ class Evaluator:
             
         # Check if parameter values match
         for key in expected_args:
-            if str(expected_args[key]) != str(model_args[key]):
+            if str(expected_args[key]).lower() != str(model_args[key]).lower():
                 return False
                 
         return True
 
-    def _are_values_equivalent(self, val1, val2):
-        """Compare two values accounting for case and number format differences"""
-        # Convert to strings for comparison
-        str1 = str(val1).strip()
-        str2 = str(val2).strip()
-        
-        # Try numeric comparison first
-        try:
-            num1 = float(str1)
-            num2 = float(str2)
-            return abs(num1 - num2) < 1e-10  # Using small epsilon for float comparison
-        except (ValueError, TypeError):
-            # If not numbers, compare strings case-insensitively
-            return str1.lower() == str2.lower()
-
-    def _get_function_call_differences(self, expected_call, model_call):
+    def _get_function_call_differences(self, ground_truth, model_call):
         """Get detailed differences between function calls"""
         differences = {
             'name_mismatch': False,
@@ -72,12 +60,16 @@ class Evaluator:
             'needs_semantic_check': False
         }
         
-        # Check function name
-        if expected_call['name'].lower() != model_call['name'].lower():
+        if not model_call:
             differences['name_mismatch'] = True
             return differences
             
-        expected_args = expected_call['arguments']
+        # Check function name
+        if ground_truth['name'].lower() != model_call['name'].lower():
+            differences['name_mismatch'] = True
+            return differences
+            
+        expected_args = ground_truth['arguments']
         model_args = model_call['arguments']
         
         # Check parameters
@@ -85,7 +77,7 @@ class Evaluator:
             if key not in model_args:
                 differences['param_differences'].append(f"Missing parameter: {key}")
                 differences['needs_semantic_check'] = True
-            elif not self._are_values_equivalent(expected_args[key], model_args[key]):
+            elif str(expected_args[key]).lower() != str(model_args[key]).lower():
                 differences['param_differences'].append(
                     f"{key}: expected '{expected_args[key]}', got '{model_args[key]}'"
                 )
@@ -99,157 +91,153 @@ class Evaluator:
                 
         return differences
 
-    def _evaluate_function_call(self, record, model_response, test_case, user_query):
-        """Evaluate a function call test case"""
-        expected_function_call = record['assistant_response']['function_call']
-        model_function_call = model_response.get('model_function_call')
-
-        # Check if model made a function call
-        if not model_function_call:
-            model_text = model_response.get('text', 'No text response available')
-            result = {
-                'test_case': test_case,
-                'user_query': user_query,
-                'expected_function_call': expected_function_call,
-                'model_function_call': None,
-                'result': 'Incorrect',
-                'mismatch_type': 'no_function_call',
-                'reason': 'Model provided text response instead of function call',
-                'model_response_text': model_text
-            }
-            return result, False
-
-        # Compare function calls
-        are_identical = self._are_function_calls_identical(expected_function_call, model_function_call)
-        needs_semantic_check = not are_identical and self.model is not None
-
-        if are_identical:
-            result = {
-                'test_case': test_case,
-                'user_query': user_query,
-                'expected_function_call': expected_function_call,
-                'model_function_call': model_function_call,
-                'result': 'Correct'
-            }
-        else:
-            # Find what's different
-            differences = self._get_function_call_differences(expected_function_call, model_function_call)
-            
-            if differences['name_mismatch']:
-                mismatch_type = 'Function'
-                reason = f"Expected function '{expected_function_call['name']}', got '{model_function_call['name']}'"
-                is_correct = False
+    async def evaluate_results(self, results_file_path):
+        """Evaluate results from the processed responses file"""
+        logger.info("Starting evaluation of processed results...")
+        
+        with open(results_file_path, 'r') as f:
+            results = json.load(f)
+        
+        self.total_tests = len(results['test_results'])
+        evaluation_tasks = []
+        
+        for test_case in results['test_results']:
+            task = self._evaluate_test_case(test_case)
+            evaluation_tasks.append(task)
+        
+        evaluated_results = await asyncio.gather(*evaluation_tasks)
+        
+        # Process results
+        detailed_results = []
+        for result in evaluated_results:
+            if result['is_correct']:
+                self.correct_predictions += 1
             else:
-                mismatch_type = 'Parameters'
-                reason = f"Value differences: {', '.join(differences['param_differences'])}"
-                is_correct = False
+                self.incorrect_predictions += 1
+            detailed_results.append(result['detailed_result'])
+            if 'semantic_comparisons' in result:
+                self.semantic_comparisons.extend(result['semantic_comparisons'])
 
-            result = {
-                'test_case': test_case,
-                'user_query': user_query,
-                'expected_function_call': expected_function_call,
-                'model_function_call': model_function_call,
-                'result': 'Incorrect' if not is_correct else 'Correct',
-                'mismatch_type': mismatch_type,
-                'reason': reason
-            }
+        # Add this line to store the detailed results
+        self.detailed_results = detailed_results
 
-        return result, needs_semantic_check
-
-    async def _evaluate_text_response(self, record, model_response, test_case, user_query):
-        """Evaluate a text response test case"""
-        expected_text = record['assistant_response']['content']
+        accuracy = (self.correct_predictions / self.total_tests) * 100 if self.total_tests > 0 else 0
         
-        # If it's a processed response (dict)
-        if isinstance(model_response, dict):
-            # Check for function call in model response first
-            if model_response.get('model_function_call'):
-                function_call = model_response['model_function_call']
-                return {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'expected_response': expected_text,
-                    'model_response': f"Made function call: {function_call['name']}",
-                    'result': 'Incorrect',
-                    'reason': 'Model made a function call when it should not have'
-                }, False
-            elif 'function_calls' in model_response:
-                function_call = model_response['function_calls'][0]
-                return {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'expected_response': expected_text,
-                    'model_response': f"Made function call: {function_call['name']}",
-                    'result': 'Incorrect',
-                    'reason': 'Model made a function call when it should not have'
-                }, False
-            
-            # Check for error message containing function call info
-            if 'error' in model_response:
-                error_msg = model_response['error']
-                if '"name": "' in error_msg:
-                    function_name = error_msg.split('"name": "')[1].split('"')[0]
-                    return {
-                        'test_case': test_case,
-                        'user_query': user_query,
-                        'expected_response': expected_text,
-                        'model_response': f"Made function call: {function_name}",
-                        'result': 'Incorrect',
-                        'reason': 'Model made a function call when it should not have'
-                    }, False
-            
-            model_text = (
-                model_response.get('model_response') or
-                model_response.get('text') or
-                model_response.get('content', '')
-            ).strip()
-            
-            if not model_text:  # If no text response, assume function call
-                function_name = 'unknown'
-                if model_response.get('model_function_call'):
-                    function_name = model_response['model_function_call'].get('name', 'unknown')
-                return {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'expected_response': expected_text,
-                    'model_response': f"Made function call: {function_name}",
-                    'result': 'Incorrect',
-                    'reason': 'Model made a function call when it should not have'
-                }, False
+        logger.info("Evaluation completed.")
         
-        # Fallback for other response types
-        else:
-            try:
-                model_text = model_response.text if hasattr(model_response, 'text') else f"Made function call: unknown"
-            except (AttributeError, TypeError):
-                return {
-                    'test_case': test_case,
-                    'user_query': user_query,
-                    'expected_response': expected_text,
-                    'model_response': "Made function call: unknown",
-                    'result': 'Incorrect',
-                    'reason': 'Model made a function call when it should not have'
-                }, False
-
-        # Normal text response evaluation
-        result = {
-            'test_case': test_case,
-            'user_query': user_query,
-            'expected_response': expected_text,
-            'model_response': model_text,
-            'result': 'Incorrect',
-            'reason': 'Responses are semantically different'
+        return {
+            'total_tests': self.total_tests,
+            'correct_predictions': self.correct_predictions,
+            'incorrect_predictions': self.incorrect_predictions,
+            'accuracy': accuracy,
+            'detailed_results': detailed_results,
+            'semantic_comparisons': self.semantic_comparisons
         }
+
+    async def _evaluate_test_case(self, test_case):
+        """Evaluate a single test case"""
+        test_id = test_case['id']
+        user_query = test_case['user_query']
+        ground_truth = test_case['ground_truth']
+        model_function_call = test_case['model_function_call']
+        model_text = test_case['model_text']
         
-        # Check for exact match first
-        is_exact_match = expected_text.strip().lower() == model_text.strip().lower()
-        needs_semantic_check = not is_exact_match and self.model is not None
+        if self.test_mode == 'function_call':
+            # Function call evaluation
+            are_identical = self._are_function_calls_identical(ground_truth['function_call'], model_function_call)
+            
+            result = {
+                'test_case': test_id,
+                'user_query': user_query,
+                'expected_function_call': ground_truth['function_call'],
+                'model_function_call': model_function_call,
+                'result': 'Correct' if are_identical else 'Incorrect'
+            }
+            
+            if not are_identical:
+                differences = self._get_function_call_differences(ground_truth['function_call'], model_function_call)
+                if differences['name_mismatch']:
+                    result['mismatch_type'] = 'Function'
+                    result['reason'] = f"Expected function '{ground_truth['function_call']['name']}', got '{model_function_call['name'] if model_function_call else 'None'}'"
+                else:
+                    result['mismatch_type'] = 'Parameters'
+                    result['reason'] = f"Value differences: {', '.join(differences['param_differences'])}"
+                
+                # Check for semantic equivalence if needed
+                if self.model and differences['needs_semantic_check']:
+                    semantic_tasks = []
+                    for param, (expected_val, model_val) in differences['param_values'].items():
+                        task = self._evaluate_semantic_equivalence(
+                            f"Parameter '{param}' for query: {user_query}",
+                            expected_val,
+                            model_val,
+                            test_id
+                        )
+                        semantic_tasks.append(task)
+                    
+                    semantic_results = await asyncio.gather(*semantic_tasks)
+                    if all(r['is_semantically_equivalent'] for r in semantic_results):
+                        result['result'] = 'Correct'
+                        result.pop('mismatch_type', None)
+                        result.pop('reason', None)
+                        return {
+                            'is_correct': True,
+                            'detailed_result': result,
+                            'semantic_comparisons': semantic_results
+                        }
+            
+            return {
+                'is_correct': result['result'] == 'Correct',
+                'detailed_result': result
+            }
         
-        if is_exact_match:
-            result['result'] = 'Correct'
-            result.pop('reason', None)
-        
-        return result, needs_semantic_check
+        else:
+            # Text response evaluation
+            result = {
+                'test_case': test_id,
+                'user_query': user_query,
+                'expected_response': ground_truth['text'],
+                'model_response': model_text,
+                'result': 'Incorrect',
+                'reason': 'Responses are semantically different'
+            }
+            
+            # Check for exact match first
+            is_exact_match = (
+                ground_truth['text'].strip().lower() == 
+                (model_text or '').strip().lower()
+            )
+            
+            if is_exact_match:
+                result['result'] = 'Correct'
+                result.pop('reason', None)
+                return {
+                    'is_correct': True,
+                    'detailed_result': result
+                }
+            
+            # Check for semantic equivalence if needed
+            if self.model and model_text:
+                semantic_result = await self._evaluate_semantic_equivalence(
+                    user_query,
+                    ground_truth['text'],
+                    model_text,
+                    test_id
+                )
+                
+                if semantic_result['is_semantically_equivalent']:
+                    result['result'] = 'Correct'
+                    result.pop('reason', None)
+                    return {
+                        'is_correct': True,
+                        'detailed_result': result,
+                        'semantic_comparisons': [semantic_result]
+                    }
+            
+            return {
+                'is_correct': False,
+                'detailed_result': result
+            }
 
     async def _evaluate_semantic_equivalence(self, user_query, expected_text, model_text, test_case):
         """Evaluate semantic equivalence using LLM judge"""
@@ -306,182 +294,6 @@ class Evaluator:
                 'judge_explanation': f"Error in semantic evaluation: {str(e)}"
             }
 
-    async def evaluate_results(self, raw_results):
-        """Evaluate raw test results in parallel"""
-        logger.info("Starting evaluation of raw results...")
-        
-        if self.test_mode == 'no_function' and self.run_both_tool_modes:
-            # Handle both tool modes
-            combined_results = {
-                'no_tools': await self._evaluate_single_run(raw_results['no_tools']),
-                'with_tools': await self._evaluate_single_run(raw_results['with_tools'])
-            }
-            return combined_results
-        else:
-            # Single run evaluation
-            return await self._evaluate_single_run(raw_results)
-
-    async def _evaluate_single_run(self, raw_results):
-        """Evaluate a single run of test results"""
-        test_dataset = raw_results['test_dataset']
-        model_responses = raw_results['model_responses']
-        run_type = raw_results.get('run_type', 'default')
-        
-        # Reset counters for this run
-        self.total_tests = len(test_dataset)
-        self.correct_predictions = 0
-        self.incorrect_predictions = 0
-        
-        # Create tasks for parallel evaluation
-        tasks = []
-        for index, (record, model_response) in enumerate(zip(test_dataset, model_responses)):
-            test_case = index + 1
-            task = self._evaluate_test_case(record, model_response, test_case)
-            tasks.append(task)
-        
-        # Run all evaluations in parallel
-        results = await asyncio.gather(*tasks)
-        
-        # Process results
-        run_results = []
-        for result in results:
-            if result['is_correct']:
-                self.correct_predictions += 1
-            else:
-                self.incorrect_predictions += 1
-            # Add run_type to the detailed result
-            result['detailed_result']['run_type'] = run_type
-            run_results.append(result['detailed_result'])
-            if 'semantic_comparisons' in result:
-                self.semantic_comparisons.extend(result['semantic_comparisons'])
-
-        accuracy = (self.correct_predictions / self.total_tests) * 100 if self.total_tests > 0 else 0
-        
-        logger.info("Evaluation completed.")
-        
-        # Store results for this run
-        if not hasattr(self, 'all_detailed_results'):
-            self.all_detailed_results = []
-        self.all_detailed_results.extend(run_results)
-        
-        return {
-            'total_tests': self.total_tests,
-            'correct_predictions': self.correct_predictions,
-            'incorrect_predictions': self.incorrect_predictions,
-            'accuracy': accuracy,
-            'detailed_results': run_results,
-            'semantic_comparisons': self.semantic_comparisons
-        }
-
-    async def _evaluate_test_case(self, record: Dict[str, Any], model_response: Dict[str, Any], test_case: int) -> Dict[str, Any]:
-        """Evaluate a single test case"""
-        user_query = record['user_query']
-        run_type = model_response.get('run_type', 'default')
-        logger.info(f"Evaluating test case {test_case}/{self.total_tests}...")
-        
-        if self.test_mode == 'function_call':
-            result, needs_semantic_check = self._evaluate_function_call(record, model_response, test_case, user_query)
-            result['run_type'] = run_type
-            
-            if needs_semantic_check:
-                expected_call = record['assistant_response']['function_call']
-                model_call = model_response.get('model_function_call')
-                differences = self._get_function_call_differences(expected_call, model_call)
-                
-                semantic_tasks = []
-                for param, (expected_val, model_val) in differences['param_values'].items():
-                    task = self._evaluate_semantic_equivalence(
-                        f"Parameter '{param}' for query: {user_query}",
-                        expected_val,
-                        model_val,
-                        test_case
-                    )
-                    semantic_tasks.append(task)
-                
-                semantic_results = await asyncio.gather(*semantic_tasks)
-                all_params_equivalent = all(r['is_semantically_equivalent'] for r in semantic_results)
-                
-                if all_params_equivalent:
-                    result['result'] = 'Correct'
-                    result.pop('mismatch_type', None)
-                    result.pop('reason', None)
-                    is_correct = True
-                else:
-                    is_correct = False
-                
-                return {
-                    'is_correct': is_correct,
-                    'detailed_result': result,
-                    'semantic_comparisons': semantic_results
-                }
-            
-            return {
-                'is_correct': result['result'] == 'Correct',
-                'detailed_result': result
-            }
-        else:
-            # Get the expected and actual responses
-            expected_response = record['assistant_response']['content']
-            
-            # Extract model response, handling different response formats
-            if isinstance(model_response, dict):
-                model_text = (
-                    model_response.get('model_response') or
-                    model_response.get('text') or
-                    model_response.get('content', '')
-                ).strip()
-            else:
-                model_text = str(model_response).strip()
-
-            # Create the result dictionary
-            result = {
-                'test_case': test_case,
-                'user_query': user_query,
-                'expected_response': expected_response,
-                'model_response': model_text,
-                'result': 'Incorrect',  # Default to incorrect
-                'reason': 'Responses are semantically different',  # Default reason
-                'run_type': run_type
-            }
-
-            # Check for exact match first
-            is_exact_match = expected_response.strip().lower() == model_text.strip().lower()
-            needs_semantic_check = not is_exact_match and self.model is not None
-
-            if is_exact_match:
-                result['result'] = 'Correct'
-                result.pop('reason', None)
-                return {
-                    'is_correct': True,
-                    'detailed_result': result
-                }
-
-            if needs_semantic_check:
-                semantic_result = await self._evaluate_semantic_equivalence(
-                    user_query,
-                    expected_response,
-                    model_text,
-                    test_case
-                )
-                
-                if semantic_result['is_semantically_equivalent']:
-                    result['result'] = 'Correct'
-                    result.pop('reason', None)
-                    is_correct = True
-                else:
-                    is_correct = False
-
-                return {
-                    'is_correct': is_correct,
-                    'detailed_result': result,
-                    'semantic_comparisons': [semantic_result]
-                }
-
-            return {
-                'is_correct': False,
-                'detailed_result': result
-            }
-
     def save_results(self, results_dir):
         """Save evaluation results to files"""
         os.makedirs(results_dir, exist_ok=True)
@@ -498,21 +310,21 @@ class Evaluator:
         
         # If we have results from both modes, combine them
         all_results = []
-        if isinstance(self.all_detailed_results, dict):
+        if isinstance(self.detailed_results, dict):
             # Add results from no_tools run
-            if 'no_tools' in self.all_detailed_results:
-                for result in self.all_detailed_results['no_tools']:
+            if 'no_tools' in self.detailed_results:
+                for result in self.detailed_results['no_tools']:
                     result['run_type'] = 'no_tools'
                     all_results.append(result)
             
             # Add results from with_tools run
-            if 'with_tools' in self.all_detailed_results:
-                for result in self.all_detailed_results['with_tools']:
+            if 'with_tools' in self.detailed_results:
+                for result in self.detailed_results['with_tools']:
                     result['run_type'] = 'with_tools'
                     all_results.append(result)
         else:
             # Single mode results
-            all_results = self.all_detailed_results
+            all_results = self.detailed_results
         
         # Sort all results by test case
         sorted_results = sorted(all_results, key=lambda x: x['test_case'])

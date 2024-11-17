@@ -21,6 +21,7 @@ from vertexai.generative_models import (
     ToolConfig,
     GenerationConfig
 )
+from utils import process_raw_responses
 
 # Suppress urllib3 connection pool warnings
 import urllib3
@@ -58,6 +59,9 @@ async def main():
     parser.add_argument('--run-both-tool-modes', 
                        action='store_true',
                        help='In no_function mode, run both with and without tools')
+    parser.add_argument('--skip-evaluation', 
+                        action='store_true',
+                        help='Skip evaluation after running tests')
     args = parser.parse_args()
 
     logger.info(f"\nStarting test run with {args.model_type} model in {args.mode} mode")
@@ -92,48 +96,31 @@ async def main():
         test_mode=args.mode
     )
 
-    # Step 1: Run tests and get raw results
-    if args.mode == 'no_function' and args.run_both_tool_modes:
-        # Run tests without tools
-        logger.info("\n=== Running tests WITHOUT tools ===")
-        no_tools_results = await tester.run_tests(use_tools=False)
-        
-        # Run tests with tools
-        logger.info("\n=== Running tests WITH tools ===")
-        with_tools_results = await tester.run_tests(use_tools=True)
-        
-        # Combine results
-        raw_results = {
-            'no_tools': {
-                'test_dataset': test_dataset,
-                'model_responses': no_tools_results['model_responses'],
-                'test_mode': args.mode,
-                'run_type': 'no_tools'
-            },
-            'with_tools': {
-                'test_dataset': test_dataset,
-                'model_responses': with_tools_results['model_responses'],
-                'test_mode': args.mode,
-                'run_type': 'with_tools'
-            }
-        }
-    else:
-        # If in no_function mode, use tools by default, otherwise follow function_call mode setting
-        use_tools = True if args.mode == 'no_function' else (args.mode == 'function_call')
-        raw_results = await tester.run_tests(use_tools=use_tools)
-
     # Create results directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_dir = os.path.join("results", f"test_run_{timestamp}")
     os.makedirs(results_dir, exist_ok=True)
 
+    # Step 1: Run tests and save raw results
+    raw_results = await tester.run_tests(use_tools=True)
+    raw_results_file = os.path.join(results_dir, "raw_responses.json")
+    with open(raw_results_file, 'w') as f:
+        json.dump(raw_results, f, indent=2)
+
+    # Step 2: Process raw results into standardized format
+    processed_results = await process_raw_responses(raw_results_file, model)
+    processed_results_file = os.path.join(results_dir, "processed_responses.json")
+    with open(processed_results_file, 'w') as f:
+        json.dump(processed_results, f, indent=2)
+
     # Save test parameters
     test_parameters = {
         "timestamp": timestamp,
         "test_mode": args.mode,
+        "model_type": args.model_type,
         "dataset_path": args.dataset,
-        "function_call_model_id": args.gemini_model_id if args.model_type == 'gemini' else args.openai_model_name,
-        "semantic_judge_model_id": args.semantic_judge_model,
+        "model_id": args.gemini_model_id if args.model_type == 'gemini' else args.openai_model_name,
+        "semantic_judge_model": args.semantic_judge_model if not args.skip_evaluation else None,
         "generation_config": {
             "temperature": 0.0
         }
@@ -143,34 +130,22 @@ async def main():
     with open(parameters_file, 'w') as f:
         json.dump(test_parameters, f, indent=2)
 
-    # Save raw results
-    raw_results_file = os.path.join(results_dir, "raw_responses.json")
-    with open(raw_results_file, 'w') as f:
-        json.dump(raw_results, f, indent=2)
+    # Step 3: Evaluate results
+    if not args.skip_evaluation:
+        logger.info("Starting evaluation...")
+        evaluator = Evaluator(
+            test_mode=args.mode,
+            semantic_judge_model_name=args.semantic_judge_model,
+            semantic_judge_prompt=args.semantic_judge_prompt,
+            run_both_tool_modes=args.run_both_tool_modes
+        )
+        
+        evaluation_results = await evaluator.evaluate_results(processed_results_file)
+        
+        # Save evaluation results
+        results_dir = evaluator.save_results(results_dir)
 
-    # Step 2: Evaluate results
-    evaluator = Evaluator(
-        test_mode=args.mode,
-        semantic_judge_model_name=args.semantic_judge_model,
-        semantic_judge_prompt=args.semantic_judge_prompt,
-        run_both_tool_modes=args.run_both_tool_modes
-    )
-    evaluation_results = await evaluator.evaluate_results(raw_results)
-    
-    # Save evaluation results
-    evaluator.save_results(results_dir)
-
-    # Log summary
-    if args.mode == 'no_function' and args.run_both_tool_modes:
-        for run_type, results in evaluation_results.items():
-            logger.info(f"""
-Evaluation Summary ({run_type}):
-Total test cases: {results['total_tests']}
-Correct predictions: {results['correct_predictions']}
-Incorrect predictions: {results['incorrect_predictions']}
-Accuracy: {results['accuracy']:.2f}%
-""")
-    else:
+        # Log summary
         logger.info(f"""
 Evaluation Summary:
 Total test cases: {evaluation_results['total_tests']}
@@ -178,6 +153,8 @@ Correct predictions: {evaluation_results['correct_predictions']}
 Incorrect predictions: {evaluation_results['incorrect_predictions']}
 Accuracy: {evaluation_results['accuracy']:.2f}%
 """)
+    else:
+        logger.info("Skipping evaluation as per user request.")
     
     logger.info("Results saved to: %s", results_dir)
 

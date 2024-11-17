@@ -113,7 +113,6 @@ class GeminiModel(LLMModel):
                 role="user",
                 parts=[Part.from_text(user_query)]
             )
-
             if use_tools and tool:
                 response = await self.model.generate_content_async(
                     prompt,
