@@ -312,6 +312,14 @@ class Evaluator:
                             'detailed_result': result,
                             'semantic_comparisons': [semantic_result]
                         }
+                    else:
+                        result['result'] = 'Incorrect'
+                        # result.pop('reason', None)
+                        return {
+                            'is_correct': False,
+                            'detailed_result': result,
+                            'semantic_comparisons': [semantic_result]
+                        }
                 else:
                     logger.debug("Skipping semantic evaluation - conditions not met")
                 
@@ -344,16 +352,20 @@ class Evaluator:
                 )
             )
             
-            judgment = response.text.strip().lower()
-            logger.debug(f"Semantic judge response: {judgment}")
+            # get the text from the first line of the response
+            judgment = response.text.strip().split('\n')[0]
+            is_equivalent = judgment.lower() == 'equivalent'
+
+            # judgment = response.text.strip().lower()
+            # logger.debug(f"Semantic judge response: {judgment}")
             
-            # Check for explicit "different" or "not equivalent" before checking for "equivalent"
-            is_equivalent = (
-                'equivalent' in judgment and 
-                'not equivalent' not in judgment and 
-                'not semantically equivalent' not in judgment and
-                'different' not in judgment
-            )
+            # # Check for explicit "different" or "not equivalent" before checking for "equivalent"
+            # is_equivalent = (
+            #     'equivalent' in judgment and 
+            #     'not equivalent' not in judgment and 
+            #     'not semantically equivalent' not in judgment and
+            #     'different' not in judgment
+            # )
             
             comparison_result = {
                 'test_case': test_case,

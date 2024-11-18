@@ -1,3 +1,5 @@
+# import sys; sys.argv.extend(["--model-type", "gemini", "--mode", "no_function", "--dataset", "datasets/test_no_tool_debug.json", "--semantic-judge-model", "gemini-1.5-pro-002", "--semantic-judge-prompt", "prompts/semantic_judge_no_tool.txt", "--run-both-tool-modes"])
+
 import os
 import json
 import asyncio
@@ -40,6 +42,7 @@ logging.getLogger('httpx').setLevel(logging.WARNING)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='DEBUG: %(message)s')
 logger = logging.getLogger(__name__)
 
 def load_dataset(dataset_path):
