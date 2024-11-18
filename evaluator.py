@@ -7,6 +7,7 @@ from vertexai.generative_models import GenerationConfig
 import asyncio
 from typing import List, Dict, Any
 # import weave
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
 
 logger = logging.getLogger(__name__)
 
@@ -331,7 +332,12 @@ class Evaluator:
                     'detailed_result': result
                 }
 
-    # @weave.op(name="semantic_judge")
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type(Exception),
+        before_sleep=before_sleep_log(logger, logging.WARNING)
+    )
     async def _evaluate_semantic_equivalence(self, user_query, expected_text, model_text, test_case):
         """Evaluate semantic equivalence of two text responses"""
         logger.debug(f"Starting semantic evaluation for test case {test_case}")

@@ -35,7 +35,12 @@ class OpenAIModel(LLMModel):
         self.system_prompt = system_prompt or "You are a helpful assistant."
         self.client = AsyncOpenAI(api_key=api_key)
 
-    # @weave.op(name="openai_generate")
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type(Exception),
+        before_sleep=before_sleep_log(logger, logging.WARNING)
+    )
     async def generate_response(self, user_query, use_tools=False, tool=None):
         messages = [
             {"role": "system", "content": self.system_prompt},
@@ -111,7 +116,12 @@ class GeminiModel(LLMModel):
             candidate_count=1
         )
 
-    # @weave.op(name="gemini_generate")
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((exceptions.ResourceExhausted, exceptions.ServiceUnavailable)),
+        before_sleep=before_sleep_log(logger, logging.WARNING)
+    )
     async def generate_response(self, user_query, use_tools=False, tool=None):
         try:
             prompt = Content(
