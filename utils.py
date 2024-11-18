@@ -1,50 +1,61 @@
 import json
 from models import GeminiModel
 
-async def process_raw_responses(raw_responses_file, model_instance):
-    """Process raw responses into standardized format"""
-    with open(raw_responses_file, 'r') as f:
+async def process_raw_responses(raw_results_file, model):
+    """Process raw response data into a standardized format"""
+    with open(raw_results_file, 'r') as f:
         raw_data = json.load(f)
-
-    processed_results = []
     
-    for record in raw_data['test_results']:
+    processed_results = {}
+    
+    # Check if we have multiple modes
+    if any(mode in raw_data for mode in ['no_tools', 'with_tools']):
+        for mode in ['no_tools', 'with_tools']:
+            if mode in raw_data:
+                processed_results[mode] = {
+                    'test_results': process_single_run(raw_data[mode]['test_results'])
+                }
+    else:
+        # Get the single mode that exists
+        mode = next(iter(raw_data))  # Gets the first (and only) key
+        processed_results = {
+            mode: {
+                'test_results': process_single_run(raw_data[mode]['test_results'])
+            }
+        }
+    
+    return processed_results
+
+def process_single_run(results):
+    """Process a single run of test results"""
+    processed_records = []
+    
+    for record in results:  # Iterate through the test_results array
         processed_record = {
-            'id': record.get('id'),
+            'id': record['id'],
             'user_query': record['user_query'],
-            'ground_truth': record.get('ground_truth'),
+            'ground_truth': record['ground_truth'],
             'model_function_call': None,
             'model_text': None
         }
-
-        # Check if we have a model response
+        
+        # Extract response from model output
         if 'model_response' in record:
             response = record['model_response']
-            
-            if isinstance(model_instance, GeminiModel):
-                # Process Gemini response
-                if 'candidates' in response and response['candidates']:
-                    candidate = response['candidates'][0]
-                    if 'content' in candidate and 'parts' in candidate['content']:
-                        parts = candidate['content']['parts']
-                        if parts:
-                            part = parts[0]
-                            if 'function_call' in part:
-                                function_call = part['function_call']
-                                processed_record['model_function_call'] = {
-                                    'name': function_call['name'],
-                                    'arguments': function_call['args']
-                                }
-                            elif 'text' in part:
-                                processed_record['model_text'] = part['text']
-            else:
-                # Process OpenAI response
-                # OpenAI responses are already in the correct format from models.py
-                processed_record['model_function_call'] = response.get('model_function_call')
-                processed_record['model_text'] = response.get('full_model_response')
-                # if 'error' in response:
-                #     processed_record['error'] = response.get('error')
+            if 'candidates' in response and response['candidates']:
+                candidate = response['candidates'][0]
+                if 'content' in candidate and 'parts' in candidate['content']:
+                    parts = candidate['content']['parts']
+                    if parts:
+                        part = parts[0]
+                        if 'function_call' in part:
+                            processed_record['model_function_call'] = {
+                                'name': part['function_call']['name'],
+                                'arguments': part['function_call']['args']
+                            }
+                        elif 'text' in part:
+                            processed_record['model_text'] = part['text']
         
-        processed_results.append(processed_record)
+        processed_records.append(processed_record)
     
-    return {'test_results': processed_results} 
+    return processed_records 

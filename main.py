@@ -102,7 +102,20 @@ async def main():
     os.makedirs(results_dir, exist_ok=True)
 
     # Step 1: Run tests and save raw results
-    raw_results = await tester.run_tests(use_tools=True)
+    raw_results = {}
+    if args.mode == 'no_function' and args.run_both_tool_modes:
+        logger.info("Running tests in both tool modes...")
+        # Run without tools
+        logger.info("Running tests without tools...")
+        raw_results['no_tools'] = await tester.run_tests(use_tools=False)
+        # Run with tools
+        logger.info("Running tests with tools...")
+        raw_results['with_tools'] = await tester.run_tests(use_tools=True)
+    else:
+        # Regular single run
+        # mode = 'with_tools' if args.mode == 'function_call' or args.run_both_tool_modes else 'no_tools'
+        raw_results['with_tools'] = await tester.run_tests(use_tools=True)
+
     raw_results_file = os.path.join(results_dir, "raw_responses.json")
     with open(raw_results_file, 'w') as f:
         json.dump(raw_results, f, indent=2)
@@ -140,19 +153,8 @@ async def main():
             run_both_tool_modes=args.run_both_tool_modes
         )
         
-        evaluation_results = await evaluator.evaluate_results(processed_results_file)
-        
-        # Save evaluation results
-        results_dir = evaluator.save_results(results_dir)
-
-        # Log summary
-        logger.info(f"""
-Evaluation Summary:
-Total test cases: {evaluation_results['total_tests']}
-Correct predictions: {evaluation_results['correct_predictions']}
-Incorrect predictions: {evaluation_results['incorrect_predictions']}
-Accuracy: {evaluation_results['accuracy']:.2f}%
-""")
+        await evaluator.evaluate_results(processed_results_file)
+        evaluator.save_results(results_dir)
     else:
         logger.info("Skipping evaluation as per user request.")
     

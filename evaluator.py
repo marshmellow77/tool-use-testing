@@ -98,29 +98,31 @@ class Evaluator:
         with open(results_file_path, 'r') as f:
             results = json.load(f)
         
-        self.total_tests = len(results['test_results'])
-        evaluation_tasks = []
+        # Check if we have separate runs for with/without tools
+        if isinstance(results, dict):
+            self.detailed_results = {}
+            
+            # Process each mode's results
+            for mode in results:
+                mode_results = await self._evaluate_single_run(results[mode]['test_results'])
+                self.detailed_results[mode] = mode_results['detailed_results']
+                
+                # Add semantic comparisons if they exist
+                if 'semantic_comparisons' in mode_results:
+                    self.semantic_comparisons.extend(mode_results['semantic_comparisons'])
+            
+            # Calculate overall metrics
+            total_tests = sum(len(results[mode]['test_results']) for mode in results)
+            correct_predictions = sum(
+                sum(1 for r in self.detailed_results[mode] if r['result'] == 'Correct')
+                for mode in self.detailed_results
+            )
+            incorrect_predictions = total_tests - correct_predictions
+            
+            self.total_tests = total_tests
+            self.correct_predictions = correct_predictions
+            self.incorrect_predictions = incorrect_predictions
         
-        for test_case in results['test_results']:
-            task = self._evaluate_test_case(test_case)
-            evaluation_tasks.append(task)
-        
-        evaluated_results = await asyncio.gather(*evaluation_tasks)
-        
-        # Process results
-        detailed_results = []
-        for result in evaluated_results:
-            if result['is_correct']:
-                self.correct_predictions += 1
-            else:
-                self.incorrect_predictions += 1
-            detailed_results.append(result['detailed_result'])
-            if 'semantic_comparisons' in result:
-                self.semantic_comparisons.extend(result['semantic_comparisons'])
-
-        # Add this line to store the detailed results
-        self.detailed_results = detailed_results
-
         accuracy = (self.correct_predictions / self.total_tests) * 100 if self.total_tests > 0 else 0
         
         logger.info("Evaluation completed.")
@@ -130,8 +132,40 @@ class Evaluator:
             'correct_predictions': self.correct_predictions,
             'incorrect_predictions': self.incorrect_predictions,
             'accuracy': accuracy,
-            'detailed_results': detailed_results,
+            'detailed_results': self.detailed_results,
             'semantic_comparisons': self.semantic_comparisons
+        }
+
+    async def _evaluate_single_run(self, test_results):
+        """Evaluate a single run of test results"""
+        evaluation_tasks = []
+        total_tests = len(test_results)
+        correct_predictions = 0
+        incorrect_predictions = 0
+        detailed_results = []
+        semantic_comparisons = []
+        
+        for test_case in test_results:
+            task = self._evaluate_test_case(test_case)
+            evaluation_tasks.append(task)
+        
+        evaluated_results = await asyncio.gather(*evaluation_tasks)
+        
+        for result in evaluated_results:
+            if result['is_correct']:
+                correct_predictions += 1
+            else:
+                incorrect_predictions += 1
+            detailed_results.append(result['detailed_result'])
+            if 'semantic_comparisons' in result:
+                semantic_comparisons.extend(result['semantic_comparisons'])
+        
+        return {
+            'total_tests': total_tests,
+            'correct_predictions': correct_predictions,
+            'incorrect_predictions': incorrect_predictions,
+            'detailed_results': detailed_results,
+            'semantic_comparisons': semantic_comparisons
         }
 
     async def _evaluate_test_case(self, test_case):
@@ -141,6 +175,10 @@ class Evaluator:
         ground_truth = test_case['ground_truth']
         model_function_call = test_case['model_function_call']
         model_text = test_case['model_text']
+        
+        logger.debug(f"Evaluating test case {test_id}")
+        logger.debug(f"Ground truth: {ground_truth['text']}")
+        logger.debug(f"Model text: {model_text}")
         
         if self.test_mode == 'function_call':
             # Function call evaluation
@@ -225,6 +263,8 @@ class Evaluator:
                     (model_text or '').strip().lower()
                 )
                 
+                logger.debug(f"Exact match check: {is_exact_match}")
+                
                 if is_exact_match:
                     result['result'] = 'Correct'
                     result.pop('reason', None)
@@ -234,7 +274,11 @@ class Evaluator:
                     }
                 
                 # Check for semantic equivalence if needed
+                logger.debug(f"Semantic judge model initialized: {self.model is not None}")
+                logger.debug(f"Model text present: {bool(model_text)}")
+                
                 if self.model and model_text:
+                    logger.debug("Proceeding with semantic evaluation")
                     semantic_result = await self._evaluate_semantic_equivalence(
                         user_query,
                         ground_truth['text'],
@@ -250,6 +294,8 @@ class Evaluator:
                             'detailed_result': result,
                             'semantic_comparisons': [semantic_result]
                         }
+                else:
+                    logger.debug("Skipping semantic evaluation - conditions not met")
                 
                 return {
                     'is_correct': False,
@@ -257,21 +303,19 @@ class Evaluator:
                 }
 
     async def _evaluate_semantic_equivalence(self, user_query, expected_text, model_text, test_case):
-        """Evaluate semantic equivalence using LLM judge"""
-        # Clean and format the texts for comparison
-        expected_text = str(expected_text).strip()
-        model_text = str(model_text).strip()
-        
-        # Remove markdown formatting from model text if present
-        model_text = model_text.replace('**', '').replace('*', '')
-        
-        prompt = self.prompt_template.format(
-            question=user_query,
-            text1=expected_text,
-            text2=model_text
-        )
-
+        """Evaluate semantic equivalence of two text responses"""
+        logger.debug(f"Starting semantic evaluation for test case {test_case}")
         try:
+            # Remove markdown formatting from model text if present
+            model_text = model_text.replace('**', '').replace('*', '')
+            
+            prompt = self.prompt_template.format(
+                question=user_query,
+                text1=expected_text,
+                text2=model_text
+            )
+            logger.debug(f"Semantic evaluation prompt: {prompt}")
+
             response = await self.model.generate_content_async(
                 prompt,
                 generation_config=GenerationConfig(
@@ -282,6 +326,8 @@ class Evaluator:
             )
             
             judgment = response.text.strip().lower()
+            logger.debug(f"Semantic judge response: {judgment}")
+            
             # Check for explicit "different" or "not equivalent" before checking for "equivalent"
             is_equivalent = (
                 'equivalent' in judgment and 
@@ -299,7 +345,9 @@ class Evaluator:
                 'judge_explanation': response.text
             }
             
+            logger.debug(f"Semantic evaluation result: {is_equivalent}")
             return comparison_result
+            
         except Exception as e:
             logger.error(f"Error in semantic evaluation for test case {test_case}: {str(e)}")
             return {
@@ -315,6 +363,35 @@ class Evaluator:
         """Save evaluation results to files"""
         os.makedirs(results_dir, exist_ok=True)
         
+        # Calculate metrics for each mode
+        no_tools_metrics = {'total': 0, 'correct': 0, 'incorrect': 0}
+        with_tools_metrics = {'total': 0, 'correct': 0, 'incorrect': 0}
+        
+        # Process results based on modes present in the data
+        all_results = []
+        if 'no_tools' in self.detailed_results:
+            for result in self.detailed_results['no_tools']:
+                result['run_type'] = 'no_tools'
+                no_tools_metrics['total'] += 1
+                if result['result'] == 'Correct':
+                    no_tools_metrics['correct'] += 1
+                else:
+                    no_tools_metrics['incorrect'] += 1
+                all_results.append(result)
+        
+        if 'with_tools' in self.detailed_results:
+            for result in self.detailed_results['with_tools']:
+                result['run_type'] = 'with_tools'
+                with_tools_metrics['total'] += 1
+                if result['result'] == 'Correct':
+                    with_tools_metrics['correct'] += 1
+                else:
+                    with_tools_metrics['incorrect'] += 1
+                all_results.append(result)
+        
+        # Sort all results by test case
+        sorted_results = sorted(all_results, key=lambda x: x['test_case'])
+        
         # Save detailed results to CSV
         results_file = os.path.join(results_dir, "test_results.csv")
         fieldnames = (
@@ -325,34 +402,13 @@ class Evaluator:
              'result', 'reason', 'run_type']
         )
         
-        # If we have results from both modes, combine them
-        all_results = []
-        if isinstance(self.detailed_results, dict):
-            # Add results from no_tools run
-            if 'no_tools' in self.detailed_results:
-                for result in self.detailed_results['no_tools']:
-                    result['run_type'] = 'no_tools'
-                    all_results.append(result)
-            
-            # Add results from with_tools run
-            if 'with_tools' in self.detailed_results:
-                for result in self.detailed_results['with_tools']:
-                    result['run_type'] = 'with_tools'
-                    all_results.append(result)
-        else:
-            # Single mode results
-            all_results = self.detailed_results
-        
-        # Sort all results by test case
-        sorted_results = sorted(all_results, key=lambda x: x['test_case'])
-        
         with open(results_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for result in sorted_results:
                 cleaned_result = {k: v for k, v in result.items() if k in fieldnames}
                 writer.writerow(cleaned_result)
-                
+        
         # Save semantic comparison logs
         if self.semantic_comparisons:
             comparisons_file = os.path.join(results_dir, "semantic_comparisons.jsonl")
@@ -360,3 +416,24 @@ class Evaluator:
                 for comparison in self.semantic_comparisons:
                     comparison['timestamp'] = datetime.now().isoformat()
                     f.write(json.dumps(comparison) + '\n')
+        
+        # Print metrics based on run mode
+        if no_tools_metrics['total'] > 0:
+            no_tools_accuracy = (no_tools_metrics['correct'] / no_tools_metrics['total']) * 100
+            logger.info(f"""
+No Tools Mode:
+Total test cases: {no_tools_metrics['total']}
+Correct predictions: {no_tools_metrics['correct']}
+Incorrect predictions: {no_tools_metrics['incorrect']}
+Accuracy: {no_tools_accuracy:.2f}%
+""")
+        
+        if with_tools_metrics['total'] > 0:
+            with_tools_accuracy = (with_tools_metrics['correct'] / with_tools_metrics['total']) * 100
+            logger.info(f"""
+{'' if no_tools_metrics['total'] > 0 else 'Single Mode '}Results:
+Total test cases: {with_tools_metrics['total']}
+Correct predictions: {with_tools_metrics['correct']}
+Incorrect predictions: {with_tools_metrics['incorrect']}
+Accuracy: {with_tools_accuracy:.2f}%
+""")
