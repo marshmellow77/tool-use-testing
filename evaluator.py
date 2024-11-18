@@ -6,6 +6,7 @@ from datetime import datetime
 from vertexai.generative_models import GenerationConfig
 import asyncio
 from typing import List, Dict, Any
+import weave
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,18 @@ class Evaluator:
             with open(semantic_judge_prompt, 'r') as f:
                 self.prompt_template = f.read()
 
+    def _are_values_equivalent(self, expected_val, model_val):
+        """Compare two values, handling numeric equivalence"""
+        # Try numeric comparison first
+        try:
+            # Convert both values to float
+            expected_num = float(str(expected_val).strip())
+            model_num = float(str(model_val).strip())
+            return abs(expected_num - model_num) < 1e-10  # Using small epsilon for float comparison
+        except (ValueError, TypeError):
+            # If conversion fails, fall back to string comparison
+            return str(expected_val).lower().strip() == str(model_val).lower().strip()
+
     def _are_function_calls_identical(self, ground_truth, model_call):
         """Check if two function calls are identical"""
         if not model_call or not ground_truth:
@@ -46,7 +59,7 @@ class Evaluator:
             
         # Check if parameter values match
         for key in expected_args:
-            if str(expected_args[key]).lower() != str(model_args[key]).lower():
+            if not self._are_values_equivalent(expected_args[key], model_args[key]):
                 return False
                 
         return True
@@ -77,12 +90,17 @@ class Evaluator:
             if key not in model_args:
                 differences['param_differences'].append(f"Missing parameter: {key}")
                 differences['needs_semantic_check'] = True
-            elif str(expected_args[key]).lower() != str(model_args[key]).lower():
+            elif not self._are_values_equivalent(expected_args[key], model_args[key]):
                 differences['param_differences'].append(
                     f"{key}: expected '{expected_args[key]}', got '{model_args[key]}'"
                 )
-                differences['param_values'][key] = (expected_args[key], model_args[key])
-                differences['needs_semantic_check'] = True
+                # Only add to param_values if it's not a numeric mismatch
+                try:
+                    float(str(expected_args[key]))
+                    float(str(model_args[key]))
+                except (ValueError, TypeError):
+                    differences['param_values'][key] = (expected_args[key], model_args[key])
+                    differences['needs_semantic_check'] = True
                 
         for key in model_args:
             if key not in expected_args:
@@ -176,9 +194,9 @@ class Evaluator:
         model_function_call = test_case['model_function_call']
         model_text = test_case['model_text']
         
-        logger.debug(f"Evaluating test case {test_id}")
-        logger.debug(f"Ground truth: {ground_truth['text']}")
-        logger.debug(f"Model text: {model_text}")
+        # logger.debug(f"Evaluating test case {test_id}")
+        # logger.debug(f"Ground truth: {ground_truth['text']}")
+        # logger.debug(f"Model text: {model_text}")
         
         if self.test_mode == 'function_call':
             # Function call evaluation
@@ -262,7 +280,7 @@ class Evaluator:
                     ground_truth['text'].strip().lower() ==
                     (model_text or '').strip().lower()
                 )
-                
+
                 logger.debug(f"Exact match check: {is_exact_match}")
                 
                 if is_exact_match:
@@ -302,6 +320,7 @@ class Evaluator:
                     'detailed_result': result
                 }
 
+    @weave.op(name="semantic_judge")
     async def _evaluate_semantic_equivalence(self, user_query, expected_text, model_text, test_case):
         """Evaluate semantic equivalence of two text responses"""
         logger.debug(f"Starting semantic evaluation for test case {test_case}")

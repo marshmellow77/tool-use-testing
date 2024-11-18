@@ -19,6 +19,7 @@ from tenacity import (
 from google.api_core import exceptions
 import logging
 import json
+import weave
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ class OpenAIModel(LLMModel):
         self.system_prompt = system_prompt or "You are a helpful assistant."
         self.client = AsyncOpenAI(api_key=api_key)
 
+    @weave.op(name="openai_generate")
     async def generate_response(self, user_query, use_tools=False, tool=None):
         messages = [
             {"role": "system", "content": self.system_prompt},
@@ -109,6 +111,7 @@ class GeminiModel(LLMModel):
             candidate_count=1
         )
 
+    @weave.op(name="gemini_generate")
     async def generate_response(self, user_query, use_tools=False, tool=None):
         try:
             prompt = Content(
