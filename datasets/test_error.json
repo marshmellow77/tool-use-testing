@@ -2,224 +2,224 @@
   {
       "id": "D001",
       "user_query": "Book me a hotel in London from February 30th to March 5th, 2025.",
-      "assistant_response": {
-          "content": "I'm sorry, but February doesn't have a 30th day. Could you please provide valid check-in and check-out dates?",
+      "ground_truth": {
+          "text": "I'm sorry, but February doesn't have a 30th day. Could you please provide valid check-in and check-out dates?",
           "no_function_call": true
       }
   },
   {
       "id": "D002",
       "user_query": "Set a reminder to attend the meeting on April 31st, 2024.",
-      "assistant_response": {
-          "content": "Apologies, but April has only 30 days. Could you provide a valid date for the reminder?",
+      "ground_truth": {
+          "text": "Apologies, but April has only 30 days. Could you provide a valid date for the reminder?",
           "no_function_call": true
       }
   },
   {
       "id": "D003",
       "user_query": "Convert 100 meters into seconds.",
-      "assistant_response": {
-          "content": "I'm sorry, but converting meters to seconds is not possible. Could you specify a different unit for conversion?",
+      "ground_truth": {
+          "text": "I'm sorry, but converting meters to seconds is not possible. Could you specify a different unit for conversion?",
           "no_function_call": true
       }
   },
   {
       "id": "D004",
       "user_query": "Get the current weather in Atlantis.",
-      "assistant_response": {
-          "content": "I'm sorry, but I couldn't find a location named Atlantis. Could you please provide a valid location?",
+      "ground_truth": {
+          "text": "I'm sorry, but I couldn't find a location named Atlantis. Could you please provide a valid location?",
           "no_function_call": true
       }
   },
   {
       "id": "D005",
       "user_query": "Translate 'Hello' into Martian language.",
-      "assistant_response": {
-          "content": "I'm sorry, but I cannot translate into Martian as it's not a recognized language. Could you specify a different target language?",
+      "ground_truth": {
+          "text": "I'm sorry, but I cannot translate into Martian as it's not a recognized language. Could you specify a different target language?",
           "no_function_call": true
       }
   },
   {
       "id": "D006",
       "user_query": "Send an email to null with the subject 'Test'.",
-      "assistant_response": {
-          "content": "It seems the recipient's email address is missing or invalid. Could you please provide a valid email address?",
+      "ground_truth": {
+          "text": "It seems the recipient's email address is missing or invalid. Could you please provide a valid email address?",
           "no_function_call": true
       }
   },
   {
       "id": "D007",
       "user_query": "Find me a restaurant that serves unicorn meat.",
-      "assistant_response": {
-          "content": "I'm sorry, but unicorns are mythical creatures. Could you specify a different cuisine or dish you're interested in?",
+      "ground_truth": {
+          "text": "I'm sorry, but unicorns are mythical creatures. Could you specify a different cuisine or dish you're interested in?",
           "no_function_call": true
       }
   },
   {
       "id": "D008",
       "user_query": "Check the traffic conditions on the moon.",
-      "assistant_response": {
-          "content": "I'm sorry, but I cannot provide traffic information for the moon. Could you specify a location on Earth?",
+      "ground_truth": {
+          "text": "I'm sorry, but I cannot provide traffic information for the moon. Could you specify a location on Earth?",
           "no_function_call": true
       }
   },
   {
       "id": "D009",
       "user_query": "Set a reminder for the meeting yesterday at 3 PM.",
-      "assistant_response": {
-          "content": "It seems the specified time is in the past. Could you provide a future date and time for the reminder?",
+      "ground_truth": {
+          "text": "It seems the specified time is in the past. Could you provide a future date and time for the reminder?",
           "no_function_call": true
       }
   },
   {
       "id": "D010",
       "user_query": "Get the stock price for XYZ123.",
-      "assistant_response": {
-          "content": "I'm sorry, but I couldn't find a stock with the symbol 'XYZ123'. Could you please provide a valid stock symbol?",
+      "ground_truth": {
+          "text": "I'm sorry, but I couldn't find a stock with the symbol 'XYZ123'. Could you please provide a valid stock symbol?",
           "no_function_call": true
       }
   },
   {
       "id": "D011",
       "user_query": "Solve for x: x + 2 = x + 2.",
-      "assistant_response": {
-          "content": "This equation has infinitely many solutions since both sides are identical. Is there another problem you'd like help with?",
+      "ground_truth": {
+          "text": "This equation has infinitely many solutions since both sides are identical. Is there another problem you'd like help with?",
           "no_function_call": true
       }
   },
   {
       "id": "D012",
       "user_query": "Book a hotel room in Narnia for next weekend.",
-      "assistant_response": {
-          "content": "I'm sorry, but I couldn't find a real location named Narnia. Could you please provide a valid city or destination?",
+      "ground_truth": {
+          "text": "I'm sorry, but I couldn't find a real location named Narnia. Could you please provide a valid city or destination?",
           "no_function_call": true
       }
   },
   {
       "id": "D013",
       "user_query": "Get my calendar events for February 29th, 2023.",
-      "assistant_response": {
-          "content": "I'm sorry, but February 2023 doesn't have a 29th day as it's not a leap year. Could you specify a valid date?",
+      "ground_truth": {
+          "text": "I'm sorry, but February 2023 doesn't have a 29th day as it's not a leap year. Could you specify a valid date?",
           "no_function_call": true
       }
   },
   {
       "id": "D014",
       "user_query": "Find restaurants with a rating of 6 stars.",
-      "assistant_response": {
-          "content": "Restaurant ratings typically go up to 5 stars. Could you specify a rating within that range?",
+      "ground_truth": {
+          "text": "Restaurant ratings typically go up to 5 stars. Could you specify a rating within that range?",
           "no_function_call": true
       }
   },
   {
       "id": "D015",
       "user_query": "Send an email to support@company with no subject and message.",
-      "assistant_response": {
-          "content": "Could you please provide a subject and message content for the email?",
+      "ground_truth": {
+          "text": "Could you please provide a subject and message text for the email?",
           "no_function_call": true
       }
   },
   {
       "id": "D016",
       "user_query": "Set a reminder to travel back in time tomorrow.",
-      "assistant_response": {
-          "content": "I'm sorry, but time travel isn't possible. Could you clarify or provide a different reminder?",
+      "ground_truth": {
+          "text": "I'm sorry, but time travel isn't possible. Could you clarify or provide a different reminder?",
           "no_function_call": true
       }
   },
   {
       "id": "D017",
       "user_query": "Get the definition of 'asdfghjkl'.",
-      "assistant_response": {
-          "content": "I'm sorry, but 'asdfghjkl' doesn't appear to be a recognized word. Could you check the spelling or provide another word?",
+      "ground_truth": {
+          "text": "I'm sorry, but 'asdfghjkl' doesn't appear to be a recognized word. Could you check the spelling or provide another word?",
           "no_function_call": true
       }
   },
   {
       "id": "D018",
       "user_query": "What's the weather in the center of the Earth?",
-      "assistant_response": {
-          "content": "I'm sorry, but I cannot retrieve weather information for the center of the Earth. Could you specify a surface location?",
+      "ground_truth": {
+          "text": "I'm sorry, but I cannot retrieve weather information for the center of the Earth. Could you specify a surface location?",
           "no_function_call": true
       }
   },
   {
       "id": "D019",
       "user_query": "Convert 50 apples to oranges.",
-      "assistant_response": {
-          "content": "I'm sorry, but I cannot convert apples to oranges. Could you provide units of measurement you'd like to convert between?",
+      "ground_truth": {
+          "text": "I'm sorry, but I cannot convert apples to oranges. Could you provide units of measurement you'd like to convert between?",
           "no_function_call": true
       }
   },
   {
       "id": "D020",
       "user_query": "Set an alarm for 25:00 tonight.",
-      "assistant_response": {
-          "content": "I'm sorry, but there are only 24 hours in a day. Could you provide a valid time for the alarm?",
+      "ground_truth": {
+          "text": "I'm sorry, but there are only 24 hours in a day. Could you provide a valid time for the alarm?",
           "no_function_call": true
       }
   },
   {
       "id": "D021",
       "user_query": "Find me a restaurant with negative five-star reviews.",
-      "assistant_response": {
-          "content": "Ratings cannot be negative. Would you like to search for restaurants with low ratings instead?",
+      "ground_truth": {
+          "text": "Ratings cannot be negative. Would you like to search for restaurants with low ratings instead?",
           "no_function_call": true
       }
   },
   {
       "id": "D022",
       "user_query": "Get the current time on Mars.",
-      "assistant_response": {
-          "content": "I'm sorry, but standard Earth time zones don't apply to Mars. Could you specify a location on Earth?",
+      "ground_truth": {
+          "text": "I'm sorry, but standard Earth time zones don't apply to Mars. Could you specify a location on Earth?",
           "no_function_call": true
       }
   },
   {
       "id": "D023",
       "user_query": "Check traffic conditions for the Bermuda Triangle.",
-      "assistant_response": {
-          "content": "I'm sorry, but I cannot provide traffic information for the Bermuda Triangle. Could you specify a different location?",
+      "ground_truth": {
+          "text": "I'm sorry, but I cannot provide traffic information for the Bermuda Triangle. Could you specify a different location?",
           "no_function_call": true
       }
   },
   {
       "id": "D024",
       "user_query": "Send an email to john@example.com but make sure it arrives yesterday.",
-      "assistant_response": {
-          "content": "I'm sorry, but I cannot send emails to arrive in the past. Would you like me to send it now?",
+      "ground_truth": {
+          "text": "I'm sorry, but I cannot send emails to arrive in the past. Would you like me to send it now?",
           "no_function_call": true
       }
   },
   {
       "id": "D025",
       "user_query": "Get stock prices for companies on Planet X.",
-      "assistant_response": {
-          "content": "I'm sorry, but I can only retrieve stock information for companies listed on Earth exchanges. Could you provide a valid stock symbol?",
+      "ground_truth": {
+          "text": "I'm sorry, but I can only retrieve stock information for companies listed on Earth exchanges. Could you provide a valid stock symbol?",
           "no_function_call": true
       }
   },
   {
       "id": "D026",
       "user_query": "Solve for y in the equation y = x + z, but I won't tell you x or z.",
-      "assistant_response": {
-          "content": "I'm sorry, but I need the values of x and z to solve for y. Could you provide those values?",
+      "ground_truth": {
+          "text": "I'm sorry, but I need the values of x and z to solve for y. Could you provide those values?",
           "no_function_call": true
       }
   },
   {
       "id": "D027",
       "user_query": "Book a hotel room in Gotham City from March 1st to March 5th.",
-      "assistant_response": {
-          "content": "I'm sorry, but I couldn't find a real location named Gotham City. Could you provide a valid city?",
+      "ground_truth": {
+          "text": "I'm sorry, but I couldn't find a real location named Gotham City. Could you provide a valid city?",
           "no_function_call": true
       }
   },
   {
       "id": "D028",
       "user_query": "Translate 'Bonjour' into 'Blahblah' language.",
-      "assistant_response": {
-          "content": "I'm sorry, but 'Blahblah' isn't a recognized language. Could you specify a valid target language?",
+      "ground_truth": {
+          "text": "I'm sorry, but 'Blahblah' isn't a recognized language. Could you specify a valid target language?",
           "no_function_call": true
       }
   }
