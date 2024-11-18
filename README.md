@@ -1,40 +1,279 @@
-# LLM Model Tester
+# Tool Selection Tester for GenAI Agents
 
-This app allows you to test language models (LLMs) on their tool selection capabilities, such as via function calling. It supports both Gemini and OpenAI GPT-4o models, and provides evaluation logic to compute accuracies.
-
-## Table of Contents
-
-- [Repository Structure](#repository-structure)
-- [Requirements](#requirements)
-- [Setup](#setup)
-- [Running the App End-to-End](#running-the-app-end-to-end)
-  - [Testing with Gemini](#testing-with-gemini)
-  - [Testing with OpenAI GPT-4o](#testing-with-openai-gpt-4o)
-- [Using the App with Custom Responses](#using-the-app-with-custom-responses)
-  - [Generating Your Own Responses](#generating-your-own-responses)
-  - [Using the Evaluation Logic](#using-the-evaluation-logic)
-- [Customizing the App](#customizing-the-app)
-- [License](#license)
+A framework for testing and evaluating LLM's capabilities to select tools and respond to user queries across different scenarios. Compatible with Gemini and OpenAI models.
 
 ## Repository Structure
 
 ```
-your_project/
-├── main.py
-├── models.py
-├── evaluator.py
-├── model_tester.py
+genai-agent-tool-selection-testing/
+├── main.py                 # Main entry point and test orchestration
+├── models.py              # Model implementations (OpenAI, Gemini)
+├── evaluator.py           # Evaluation logic and metrics
+├── model_tester.py        # Test execution engine
+├── utils.py              # Utility functions for processing responses
 ├── tools/
-│   └── functions.py
+│   ├── functions.py      # Function definitions for tool calling
+│   └── registry.py       # Function registry and model-specific formatting
 ├── datasets/
-│   ├── function_call_dataset.json
-│   └── text_response_dataset.json
+│   ├── test_tool_selection.json    # Tool selection test cases
+│   ├── test_clarifying.json        # Clarification response cases
+│   ├── test_error.json             # Error handling cases
+│   ├── test_no_tool.json           # Direct response cases
+│   ├── test_not_supported.json     # Not supported tests
 ├── prompts/
 │   ├── semantic_judge_function_call.txt
-│   └── semantic_judge_text.txt
-├── results/
+│   ├── semantic_judge_text.txt
+│   └── semantic_judge_clarifying.txt
+├── results/              # Test run outputs
 ├── requirements.txt
-├── README.md
+└── README.md
+```
+
+## Architecture
+
+![Architecture](./assets/tool_selection_testing.png)
+
+## Test Datasets
+
+The framework includes several specialized test datasets:
+
+1. **Tool Selection Tests** (`test_tool_selection.json`)
+   - Tests model's ability to select appropriate functions
+   - Includes ground truth function calls with arguments
+   - Covers various domains (weather, navigation, translation, etc.)
+
+2. **Clarification Tests** (`test_clarifying.json`)
+   - Tests model's ability to request missing information
+   - Validates appropriate clarifying questions
+   - Ensures models don't make assumptions with incomplete data
+
+3. **Error Handling Tests** (`test_error.json`)
+   - Tests model's response to invalid inputs
+   - Includes cases like invalid dates, non-existent locations
+   - Validates appropriate error messages
+
+4. **Direct Response Tests** (`test_no_tool.json`)
+   - Tests model's knowledge-based responses
+   - No function calling required
+   - Factual questions with clear ground truth
+
+5. **Not Supported Tests** (`test_not_supported.json`)
+   - Tests model's ability to gracefully handle unsupported actions
+   - Includes requests for device control, media playback, real-time data
+   - Validates clear communication of limitations
+   - Ensures helpful alternative suggestions when possible
+
+## Tool Repository
+
+The framework includes a model-agnostic tool repository that defines available functions and automatically converts them to the appropriate format for each LLM at runtime.
+
+### Tool Definition Structure
+
+Tools are defined using a simple, model-independent format:
+
+```python
+Function(
+    name="get_weather",
+    description="Get the weather in a given location",
+    parameters=[
+        FunctionParameter(
+            name="location",
+            type="string",
+            description="The city name of the location."
+        )
+    ]
+)
+```
+
+### Available Tools
+
+The framework includes common tools for testing:
+- Weather information retrieval
+- Time zone conversions
+- Text translation
+- Route calculation
+- Hotel booking
+- Stock price lookup
+- Email sending
+- News headlines retrieval
+- Unit conversion
+- Reminder setting
+- Restaurant search
+- Calendar event retrieval
+- Math problem solving
+- Word definition lookup
+- Traffic condition checking
+
+### Model-Specific Conversion
+
+The tool registry automatically converts function definitions to model-specific formats:
+
+1. **OpenAI Format**
+   - Converts to OpenAI's function calling format
+   - Includes required parameters specification
+   - Maintains JSON Schema compatibility
+
+2. **Gemini Format**
+   - Converts to Gemini's FunctionDeclaration format
+   - Preserves parameter descriptions and types
+   - Packages functions into a Tool object
+
+### Adding New Tools
+
+To add new tools to the framework:
+
+1. Define the function in `tools/functions.py`:
+```python
+registry.register(Function(
+    name="your_function",
+    description="Description of what your function does",
+    parameters=[
+        FunctionParameter(
+            name="param_name",
+            type="string",
+            description="Parameter description",
+            required=True  # or False for optional parameters
+        )
+    ]
+))
+```
+
+2. The function will automatically be available to both Gemini and OpenAI models with the appropriate format conversion handled by the registry.
+
+
+## End-to-End Process
+
+The testing framework operates in three main stages:
+
+1. **Model Testing**
+   - Loads test cases from selected dataset
+   - Initializes model (Gemini or OpenAI) with appropriate configuration
+   - Executes each test case, capturing raw model responses
+   - Handles both function calling and direct response modes
+   - Manages API interactions and error handling
+
+2. **Response Processing**
+   - Converts model-specific response formats into a standardized structure
+   - Extracts relevant information (function calls, arguments, text responses)
+   - Handles different response structures between Gemini and OpenAI
+   - Prepares responses for evaluation
+
+3. **Evaluation**
+   - Performs multi-level response validation:
+     a. Exact Match Check
+        - For function calls: Matches function name and arguments exactly
+        - For text responses: Direct string comparison
+     b. Semantic Evaluation
+        - Uses LLM (default: GPT-4) as semantic judge
+        - Evaluates response meaning and intent
+        - Considers variations in phrasing and format
+     c. Mismatch Analysis
+        - Categorizes types of mismatches
+        - Identifies specific differences in function calls
+        - Analyzes parameter variations
+   - Generates comprehensive metrics and reports
+
+## Using Custom Model Responses
+
+You can use the test datasets with your own model and bring the responses back for evaluation:
+
+1. **Load and Use Test Dataset**
+   - Import test cases from provided JSON files
+   - Use cases to test your own model implementation
+   - Generate responses in your preferred format
+
+2. **Format Responses**
+   - Convert your model's responses to the framework's format
+   - For function calls: Include function name and arguments
+   - For text responses: Provide direct response text
+   - Follow the structure in example datasets
+
+3. **Run Evaluation**
+   - Use the framework's evaluation module independently
+   - Get detailed accuracy metrics and analysis
+   - Compare performance with other models
+
+## Running Tests
+
+```bash
+# Test function calling with Gemini
+python main.py --model-type gemini --mode function_call --dataset datasets/test_tool_selection.json
+
+# Test direct responses with OpenAI
+python main.py --model-type openai --mode no_function --dataset datasets/test_no_tool.json --openai-api-key YOUR_KEY
+```
+
+
+
+## Command Line Arguments
+
+The application supports various command-line arguments for customization:
+
+```bash
+python main.py [arguments]
+```
+
+### Required Arguments
+- `--model-type`: Type of model to test
+  - Choices: `gemini`, `openai`
+  - Example: `--model-type gemini`
+
+- `--dataset`: Path to test dataset file
+  - Example: `--dataset datasets/test_tool_selection.json`
+
+### Optional Arguments
+- `--mode`: Testing mode (default: 'function_call')
+  - Choices: `function_call`, `no_function`
+  - Example: `--mode no_function`
+
+- `--openai-model-name`: OpenAI model to use (default: 'gpt-4o-mini')
+  - Example: `--openai-model-name gpt-4`
+
+- `--gemini-model-id`: Gemini model ID (default: 'gemini-1.5-flash-002')
+  - Example: `--gemini-model-id gemini-1.0-pro`
+
+- `--openai-api-key`: OpenAI API key (required for OpenAI models)
+  - Example: `--openai-api-key sk-...`
+
+- `--semantic-judge-model`: Model for semantic evaluation (default: 'gpt-4')
+  - Example: `--semantic-judge-model gpt-4`
+
+- `--semantic-judge-prompt`: Path to custom semantic judge prompt file
+  - Example: `--semantic-judge-prompt prompts/custom_prompt.txt`
+
+- `--run-both-tool-modes`: Run tests both with and without tools in no_function mode
+  - Flag only, no value needed
+  - Example: `--run-both-tool-modes`
+
+- `--skip-evaluation`: Skip the evaluation phase after running tests
+  - Flag only, no value needed
+  - Example: `--skip-evaluation`
+
+### Example Commands
+
+1. Basic Gemini test with function calling:
+```bash
+python main.py --model-type gemini --dataset datasets/test_tool_selection.json
+```
+
+2. OpenAI test with custom model and evaluation settings:
+```bash
+python main.py \
+  --model-type openai \
+  --mode no_function \
+  --dataset datasets/test_no_tool.json \
+  --openai-api-key YOUR_KEY \
+  --openai-model-name gpt-4 \
+  --semantic-judge-model gpt-4 \
+  --semantic-judge-prompt prompts/custom_prompt.txt
+```
+
+3. Gemini test with evaluation skipped:
+```bash
+python main.py \
+  --model-type gemini \
+  --dataset datasets/test_clarifying.json \
+  --skip-evaluation
 ```
 
 ## Requirements
@@ -42,117 +281,7 @@ your_project/
 - Python 3.7 or higher
 - OpenAI API key (for OpenAI models and semantic judge)
 - Google Cloud credentials (for Gemini model)
-- Necessary Python packages (see `requirements.txt`)
-
-## Setup
-
-1. **Clone the repository**:
-
-   ```
-   git clone https://github.com/yourusername/your_project.git
-   cd your_project
-   ```
-
-2. **Install dependencies**:
-
-   ```
-   pip install -r requirements.txt
-   ```
-
-3. **Set up API keys**:
-
-   - For **OpenAI models**, obtain your API key from your OpenAI account.
-   - For **Gemini model**, ensure your Google Cloud credentials are set up properly.
-
-## Running the App End-to-End
-
-### Testing with Gemini
-
-```
-python main.py --model-type gemini --mode function_call --dataset datasets/function_call_dataset.json
-```
-
-### Testing with OpenAI GPT-4o
-
-```
-python main.py --model-type openai --mode function_call --dataset datasets/function_call_dataset.json --openai-api-key YOUR_OPENAI_API_KEY
-```
-
-Replace `YOUR_OPENAI_API_KEY` with your actual OpenAI API key.
-
-## Using the App with Custom Responses
-
-If you want to use the test dataset, generate your own responses, and then use the evaluation logic, follow these steps:
-
-### Generating Your Own Responses
-
-1. **Load the test dataset**:
-
-   ```python
-   import json
-
-   def load_dataset(dataset_path):
-       with open(dataset_path, 'r') as f:
-           return json.load(f)
-
-   test_dataset = load_dataset('datasets/function_call_dataset.json')
-   ```
-
-2. **Generate responses using your own model or method**:
-
-   ```python
-   model_responses = []
-
-   for record in test_dataset:
-       user_query = record['user_query']
-       # Generate response using your own logic
-       # For example:
-       response = my_custom_model.generate_response(user_query)
-       # For function_call mode, response should be a dict with 'name' and 'arguments'
-       # For no_function mode, response should be a string
-       model_responses.append(response)
-   ```
-
-### Using the Evaluation Logic
-
-1. **Import the Evaluator**:
-
-   ```python
-   from evaluator import Evaluator
-   ```
-
-2. **Initialize the Evaluator**:
-
-   ```python
-   evaluator = Evaluator(
-       test_mode='function_call',  # or 'no_function' for text responses
-       semantic_judge_model_name='gpt-4',  # or your preferred model
-       api_key='YOUR_OPENAI_API_KEY'
-   )
-   ```
-
-3. **Run the Evaluation**:
-
-   ```python
-   import asyncio
-
-   results = asyncio.run(evaluator.evaluate(test_dataset, model_responses))
-   ```
-
-4. **Review the Results**:
-
-   ```python
-   print(f"Total tests: {results['total_tests']}")
-   print(f"Correct predictions: {results['correct_predictions']}")
-   print(f"Incorrect predictions: {results['incorrect_predictions']}")
-   print(f"Accuracy: {results['accuracy']:.2f}%")
-   ```
-
-## Customizing the App
-
-- **Adding More Functions**: Add more function definitions to `tools/functions.py`, ensuring each function includes `"additionalProperties": False` in the parameters.
-- **Modifying Datasets**: Update the datasets in the `datasets/` directory as needed.
-- **Adjusting Prompts**: Modify the prompts in the `prompts/` directory if needed.
+- Required packages in requirements.txt
 
 ## License
 
