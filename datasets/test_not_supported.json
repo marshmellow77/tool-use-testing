@@ -1,136 +1,162 @@
 [
-    {
-      "user_query": "Play some jazz music.",
+  {
+      "id": "E001",
+      "user_query": "What is the capital of Italy?",
       "assistant_response": {
-        "content": "I'm sorry, but I cannot play music. However, I can help with information or tasks like providing weather updates or translating text. Let me know if you need assistance with any of those.",
-        "no_function_call": true
+          "content": "The capital of Italy is Rome.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Turn off the living room lights.",
+  },
+  {
+      "id": "E002",
+      "user_query": "Who painted the Sistine Chapel?",
       "assistant_response": {
-        "content": "Apologies, but I don't have the capability to control smart home devices. If there's something else I can assist you with, please let me know.",
-        "no_function_call": true
+          "content": "The Sistine Chapel was painted by Michelangelo.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Order me a pepperoni pizza for delivery.",
+  },
+  {
+      "id": "E003",
+      "user_query": "What is the boiling point of water?",
       "assistant_response": {
-        "content": "I'm sorry, but I can't place orders or make purchases. If you'd like, I can help you find a restaurant's contact information.",
-        "no_function_call": true
+          "content": "The boiling point of water is 100 degrees Celsius at standard atmospheric pressure.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Start a video call with Sarah.",
+  },
+  {
+      "id": "E004",
+      "user_query": "Who discovered penicillin?",
       "assistant_response": {
-        "content": "Apologies, but I cannot initiate video calls. However, I can help you draft an email or send a message if you'd like.",
-        "no_function_call": true
+          "content": "Penicillin was discovered by Alexander Fleming.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "What's the status of my flight AA123?",
+  },
+  {
+      "id": "E005",
+      "user_query": "What is the largest mammal in the world?",
       "assistant_response": {
-        "content": "I'm sorry, but I don't have access to real-time flight information. If you need help with weather updates or route calculations, I'd be happy to assist.",
-        "no_function_call": true
+          "content": "The blue whale is the largest mammal in the world.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Add milk to my shopping list.",
+  },
+  {
+      "id": "E006",
+      "user_query": "What is the currency of Japan?",
       "assistant_response": {
-        "content": "Apologies, but I can't manage shopping lists. Let me know if there's something else I can help you with.",
-        "no_function_call": true
+          "content": "The currency of Japan is the yen.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Remind me to stretch every hour.",
+  },
+  {
+      "id": "E007",
+      "user_query": "What is the distance from the Earth to the Moon?",
       "assistant_response": {
-        "content": "I'm sorry, but I can only set single reminders for specific times. If you'd like to set a one-time reminder, please provide the event and time.",
-        "no_function_call": true
+          "content": "The average distance from the Earth to the Moon is about 384,400 kilometers.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Activate airplane mode.",
+  },
+  {
+      "id": "E008",
+      "user_query": "Who wrote '1984'?",
       "assistant_response": {
-        "content": "Apologies, but I cannot control device settings. If you need assistance with information or tasks, please let me know.",
-        "no_function_call": true
+          "content": "'1984' was written by George Orwell.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Read my new text messages.",
+  },
+  {
+      "id": "E009",
+      "user_query": "What is the chemical formula for salt?",
       "assistant_response": {
-        "content": "I'm sorry, but I don't have access to your text messages. If you'd like help composing an email or finding information, I'm here to assist.",
-        "no_function_call": true
+          "content": "The chemical formula for salt is NaCl.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Book me a flight to Tokyo next Monday.",
+  },
+  {
+      "id": "E010",
+      "user_query": "What is the fastest land animal?",
       "assistant_response": {
-        "content": "I'm sorry, but I cannot book flights. However, I can help you find information about flights or assist with other tasks.",
-        "no_function_call": true
+          "content": "The cheetah is the fastest land animal.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "What's playing at the local cinema tonight?",
+  },
+  {
+      "id": "E011",
+      "user_query": "What is the main ingredient in bread?",
       "assistant_response": {
-        "content": "Apologies, but I don't have access to real-time movie listings. If you need help with other information, feel free to ask.",
-        "no_function_call": true
+          "content": "The main ingredient in bread is flour.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Control the thermostat and set it to 72 degrees.",
+  },
+  {
+      "id": "E012",
+      "user_query": "What is the capital of Canada?",
       "assistant_response": {
-        "content": "I'm sorry, but I can't control home devices like thermostats. Let me know if there's something else I can assist you with.",
-        "no_function_call": true
+          "content": "The capital of Canada is Ottawa.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Can you show me cat videos?",
+  },
+  {
+      "id": "E013",
+      "user_query": "What is the largest ocean on Earth?",
       "assistant_response": {
-        "content": "Apologies, but I can't display videos. If you'd like information on a topic or need assistance with a task, please let me know.",
-        "no_function_call": true
+          "content": "The largest ocean on Earth is the Pacific Ocean.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Start recording audio.",
+  },
+  {
+      "id": "E014",
+      "user_query": "Who is known as the father of modern physics?",
       "assistant_response": {
-        "content": "I'm sorry, but I don't have the capability to record audio. If there's anything else you need help with, feel free to ask.",
-        "no_function_call": true
+          "content": "Albert Einstein is known as the father of modern physics.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Open the presentation file I was working on.",
+  },
+  {
+      "id": "E015",
+      "user_query": "What is the primary gas in the Earth's atmosphere?",
       "assistant_response": {
-        "content": "Apologies, but I can't access or open files. If you need assistance with information or tasks, I'm here to help.",
-        "no_function_call": true
+          "content": "The primary gas in the Earth's atmosphere is nitrogen.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Locate my phone.",
+  },
+  {
+      "id": "E016",
+      "user_query": "What is the smallest country in the world?",
       "assistant_response": {
-        "content": "I'm sorry, but I can't perform device location services. Let me know if there's something else I can assist you with.",
-        "no_function_call": true
+          "content": "The smallest country in the world is Vatican City.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Reserve a table at The French Laundry for tonight.",
+  },
+  {
+      "id": "E017",
+      "user_query": "What is the hardest natural substance on Earth?",
       "assistant_response": {
-        "content": "I'm sorry, but I cannot make reservations. However, I can provide you with the restaurant's contact information if you'd like.",
-        "no_function_call": true
+          "content": "Diamond is the hardest natural substance on Earth.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Set my alarm for 7 AM daily.",
+  },
+  {
+      "id": "E018",
+      "user_query": "What is the main ingredient in sushi?",
       "assistant_response": {
-        "content": "Apologies, but I can only set reminders for specific times. If you'd like to set a one-time reminder, please provide the event and time.",
-        "no_function_call": true
+          "content": "The main ingredient in sushi is rice.",
+          "no_function_call": true
       }
-    },
-    {
-      "user_query": "Update my social media status to 'Feeling happy!'",
+  },
+  {
+      "id": "E019",
+      "user_query": "What is the tallest mountain in the world?",
       "assistant_response": {
-        "content": "I'm sorry, but I can't interact with social media accounts. If there's anything else I can help you with, please let me know.",
-        "no_function_call": true
+          "content": "The tallest mountain in the world is Mount Everest.",
+          "no_function_call": true
       }
-    }
-  ]
-  
+  },
+  {
+      "id": "E020",
+      "user_query": "What is the primary language spoken in China?",
+      "assistant_response": {
+          "content": "The primary language spoken in China is Mandarin.",
+          "no_function_call": true
+      }
+  }
+]

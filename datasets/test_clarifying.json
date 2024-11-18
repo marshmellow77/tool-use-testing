@@ -1,213 +1,242 @@
 [
-    {
+  {
+      "id": "C001",
       "user_query": "Set a reminder for my meeting.",
       "assistant_response": {
-        "content": "Sure, when would you like me to set the reminder for your meeting?",
-        "no_function_call": true
+          "content": "Sure, when would you like me to set the reminder for your meeting?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C002",
       "user_query": "Find me a restaurant.",
       "assistant_response": {
-        "content": "Certainly! What type of cuisine and location are you interested in?",
-        "no_function_call": true
+          "content": "Certainly! What type of cuisine and location are you interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C003",
       "user_query": "Translate this text for me.",
       "assistant_response": {
-        "content": "Of course! Could you please provide the text you'd like me to translate and the target language?",
-        "no_function_call": true
+          "content": "Of course! Could you please provide the text you'd like me to translate and the target language?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C004",
       "user_query": "What's the weather like?",
       "assistant_response": {
-        "content": "Sure, could you please specify the location you're interested in?",
-        "no_function_call": true
+          "content": "Sure, could you please specify the location you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C005",
       "user_query": "Send an email.",
       "assistant_response": {
-        "content": "Absolutely! Could you please provide the recipient's email address, subject, and message?",
-        "no_function_call": true
+          "content": "Absolutely! Could you please provide the recipient's email address, subject, and message?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C006",
       "user_query": "Calculate a route for me.",
       "assistant_response": {
-        "content": "Certainly! Could you please provide the start and end locations and your preferred mode of transportation?",
-        "no_function_call": true
+          "content": "Certainly! Could you please provide the start and end locations and your preferred mode of transportation?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C007",
       "user_query": "Convert this measurement.",
       "assistant_response": {
-        "content": "Sure, could you please specify the value and the units you'd like to convert from and to?",
-        "no_function_call": true
+          "content": "Sure, could you please specify the value and the units you'd like to convert from and to?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C008",
       "user_query": "Get me the latest news.",
       "assistant_response": {
-        "content": "I'd be happy to! Is there a specific topic or category you're interested in?",
-        "no_function_call": true
+          "content": "I'd be happy to! Is there a specific topic or category you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C009",
       "user_query": "Book a hotel room.",
       "assistant_response": {
-        "content": "Sure, could you please provide the city, check-in and check-out dates, and the number of guests?",
-        "no_function_call": true
+          "content": "Sure, could you please provide the city, check-in and check-out dates, and the number of guests?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C010",
       "user_query": "What's the stock price?",
       "assistant_response": {
-        "content": "Certainly! Could you please specify the stock symbol you're interested in?",
-        "no_function_call": true
+          "content": "Certainly! Could you please specify the stock symbol you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C011",
       "user_query": "Solve this math problem.",
       "assistant_response": {
-        "content": "I'd be happy to help! Could you please provide the math problem you'd like me to solve?",
-        "no_function_call": true
+          "content": "I'd be happy to help! Could you please provide the math problem you'd like me to solve?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C012",
       "user_query": "Check my calendar.",
       "assistant_response": {
-        "content": "Sure, for which date would you like me to check your calendar events?",
-        "no_function_call": true
+          "content": "Sure, for which date would you like me to check your calendar events?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C013",
       "user_query": "Get the current time.",
       "assistant_response": {
-        "content": "Certainly! Could you please specify the timezone or city you're interested in?",
-        "no_function_call": true
+          "content": "Certainly! Could you please specify the timezone or city you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C014",
       "user_query": "Look up this word for me.",
       "assistant_response": {
-        "content": "Of course! Could you please tell me the word you'd like me to look up?",
-        "no_function_call": true
+          "content": "Of course! Could you please tell me the word you'd like me to look up?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C015",
       "user_query": "Check the traffic conditions.",
       "assistant_response": {
-        "content": "Sure, could you please provide the route or area you'd like me to check traffic for?",
-        "no_function_call": true
+          "content": "Sure, could you please provide the route or area you'd like me to check traffic for?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C016",
       "user_query": "Find me a good place to eat sushi.",
       "assistant_response": {
-        "content": "Certainly! Could you please specify the location where you're looking for sushi restaurants?",
-        "no_function_call": true
+          "content": "Certainly! Could you please specify the location where you're looking for sushi restaurants?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C017",
       "user_query": "Translate 'Hello' for me.",
       "assistant_response": {
-        "content": "Sure, which language would you like 'Hello' translated into?",
-        "no_function_call": true
+          "content": "Sure, which language would you like 'Hello' translated into?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C018",
       "user_query": "Set a reminder to pick up groceries.",
       "assistant_response": {
-        "content": "Absolutely! When would you like me to set the reminder for?",
-        "no_function_call": true
+          "content": "Absolutely! When would you like me to set the reminder for?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C019",
       "user_query": "What's on my schedule?",
       "assistant_response": {
-        "content": "I'd be happy to check. Is there a specific date or time range you're interested in?",
-        "no_function_call": true
+          "content": "I'd be happy to check. Is there a specific date or time range you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C020",
       "user_query": "Convert 100.",
       "assistant_response": {
-        "content": "Sure, could you please specify the units you'd like to convert from and to?",
-        "no_function_call": true
+          "content": "Sure, could you please specify the units you'd like to convert from and to?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C021",
       "user_query": "Find a math solution for me.",
       "assistant_response": {
-        "content": "Certainly! Could you please provide the math problem you'd like me to solve?",
-        "no_function_call": true
+          "content": "Certainly! Could you please provide the math problem you'd like me to solve?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C022",
       "user_query": "Get the weather forecast for tomorrow.",
       "assistant_response": {
-        "content": "Sure, could you please specify the location you're interested in?",
-        "no_function_call": true
+          "content": "Sure, could you please specify the location you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C023",
       "user_query": "Email my colleague.",
       "assistant_response": {
-        "content": "Absolutely! Could you please provide your colleague's email address and the message you'd like to send?",
-        "no_function_call": true
+          "content": "Absolutely! Could you please provide your colleague's email address and the message you'd like to send?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C024",
       "user_query": "Define this term for me.",
       "assistant_response": {
-        "content": "Of course! Could you please tell me the term you'd like me to define?",
-        "no_function_call": true
+          "content": "Of course! Could you please tell me the term you'd like me to define?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C025",
       "user_query": "Plan a route to the nearest gas station.",
       "assistant_response": {
-        "content": "Certainly! Could you please provide your current location and preferred mode of transportation?",
-        "no_function_call": true
+          "content": "Certainly! Could you please provide your current location and preferred mode of transportation?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C026",
       "user_query": "Get me stock updates.",
       "assistant_response": {
-        "content": "Sure, could you please specify which stock symbols you're interested in?",
-        "no_function_call": true
+          "content": "Sure, could you please specify which stock symbols you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C027",
       "user_query": "Set an appointment.",
       "assistant_response": {
-        "content": "Certainly! Could you please provide the date, time, and details of the appointment?",
-        "no_function_call": true
+          "content": "Certainly! Could you please provide the date, time, and details of the appointment?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C028",
       "user_query": "Check today's news.",
       "assistant_response": {
-        "content": "I'd be happy to! Is there a specific topic or category you're interested in?",
-        "no_function_call": true
+          "content": "I'd be happy to! Is there a specific topic or category you're interested in?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C029",
       "user_query": "Solve an equation for me.",
       "assistant_response": {
-        "content": "Sure, could you please provide the equation you'd like me to solve?",
-        "no_function_call": true
+          "content": "Sure, could you please provide the equation you'd like me to solve?",
+          "no_function_call": true
       }
-    },
-    {
+  },
+  {
+      "id": "C030",
       "user_query": "Find traffic updates.",
       "assistant_response": {
-        "content": "Certainly! Could you please specify the route or area you're interested in?",
-        "no_function_call": true
+          "content": "Certainly! Could you please specify the route or area you're interested in?",
+          "no_function_call": true
       }
-    }
-  ]
-  
+  }
+]
