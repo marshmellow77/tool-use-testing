@@ -151,7 +151,8 @@ class Evaluator:
                 'user_query': user_query,
                 'expected_function_call': ground_truth['function_call'],
                 'model_function_call': model_function_call,
-                'result': 'Correct' if are_identical else 'Incorrect'
+                'result': 'Correct' if are_identical else 'Incorrect',
+                'model_response': model_text  # Record model's text response
             }
             
             if not are_identical:
@@ -193,51 +194,67 @@ class Evaluator:
         
         else:
             # Text response evaluation
-            result = {
-                'test_case': test_id,
-                'user_query': user_query,
-                'expected_response': ground_truth['text'],
-                'model_response': model_text,
-                'result': 'Incorrect',
-                'reason': 'Responses are semantically different'
-            }
-            
-            # Check for exact match first
-            is_exact_match = (
-                ground_truth['text'].strip().lower() == 
-                (model_text or '').strip().lower()
-            )
-            
-            if is_exact_match:
-                result['result'] = 'Correct'
-                result.pop('reason', None)
+            if model_function_call is not None:
+                # Model made a function call when it shouldn't have
+                result = {
+                    'test_case': test_id,
+                    'user_query': user_query,
+                    'expected_response': ground_truth['text'],
+                    'model_response': f"Made function call: {model_function_call['name']}",
+                    'result': 'Incorrect',
+                    'reason': 'Model made a function call when it should not have'
+                }
                 return {
-                    'is_correct': True,
+                    'is_correct': False,
                     'detailed_result': result
                 }
-            
-            # Check for semantic equivalence if needed
-            if self.model and model_text:
-                semantic_result = await self._evaluate_semantic_equivalence(
-                    user_query,
-                    ground_truth['text'],
-                    model_text,
-                    test_id
+            else:
+                # Proceed with text comparison
+                result = {
+                    'test_case': test_id,
+                    'user_query': user_query,
+                    'expected_response': ground_truth['text'],
+                    'model_response': model_text,
+                    'result': 'Incorrect',
+                    'reason': 'Responses are semantically different'
+                }
+                
+                # Exact match check
+                is_exact_match = (
+                    ground_truth['text'].strip().lower() ==
+                    (model_text or '').strip().lower()
                 )
                 
-                if semantic_result['is_semantically_equivalent']:
+                if is_exact_match:
                     result['result'] = 'Correct'
                     result.pop('reason', None)
                     return {
                         'is_correct': True,
-                        'detailed_result': result,
-                        'semantic_comparisons': [semantic_result]
+                        'detailed_result': result
                     }
-            
-            return {
-                'is_correct': False,
-                'detailed_result': result
-            }
+                
+                # Check for semantic equivalence if needed
+                if self.model and model_text:
+                    semantic_result = await self._evaluate_semantic_equivalence(
+                        user_query,
+                        ground_truth['text'],
+                        model_text,
+                        test_id
+                    )
+                    
+                    if semantic_result['is_semantically_equivalent']:
+                        result['result'] = 'Correct'
+                        result.pop('reason', None)
+                        return {
+                            'is_correct': True,
+                            'detailed_result': result,
+                            'semantic_comparisons': [semantic_result]
+                        }
+                
+                return {
+                    'is_correct': False,
+                    'detailed_result': result
+                }
 
     async def _evaluate_semantic_equivalence(self, user_query, expected_text, model_text, test_case):
         """Evaluate semantic equivalence using LLM judge"""
@@ -343,5 +360,3 @@ class Evaluator:
                 for comparison in self.semantic_comparisons:
                     comparison['timestamp'] = datetime.now().isoformat()
                     f.write(json.dumps(comparison) + '\n')
-                    
-        return results_dir
