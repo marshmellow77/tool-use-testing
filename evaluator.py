@@ -189,6 +189,7 @@ class Evaluator:
     async def _evaluate_test_case(self, test_case):
         """Evaluate a single test case"""
         test_id = test_case['id']
+        logger.info(f"Evaluating test case {test_id}")
         user_query = test_case['user_query']
         ground_truth = test_case['ground_truth']
         model_function_call = test_case['model_function_call']
@@ -222,6 +223,7 @@ class Evaluator:
                 
                 # Check for semantic equivalence if needed
                 if self.model and differences['needs_semantic_check']:
+                    logger.info(f"Running semantic evaluation for test case {test_id}")
                     semantic_tasks = []
                     for param, (expected_val, model_val) in differences['param_values'].items():
                         task = self._evaluate_semantic_equivalence(
@@ -296,6 +298,7 @@ class Evaluator:
                 logger.debug(f"Model text present: {bool(model_text)}")
                 
                 if self.model and model_text:
+                    logger.info(f"Running semantic evaluation for test case {test_id}")
                     logger.debug("Proceeding with semantic evaluation")
                     semantic_result = await self._evaluate_semantic_equivalence(
                         user_query,
@@ -462,7 +465,7 @@ Accuracy: {no_tools_accuracy:.2f}%
         if with_tools_metrics['total'] > 0:
             with_tools_accuracy = (with_tools_metrics['correct'] / with_tools_metrics['total']) * 100
             logger.info(f"""
-{'' if no_tools_metrics['total'] > 0 else 'Single Mode '}Results:
+{'With Tools Mode:' if no_tools_metrics['total'] > 0 else 'Results:'}
 Total test cases: {with_tools_metrics['total']}
 Correct predictions: {with_tools_metrics['correct']}
 Incorrect predictions: {with_tools_metrics['incorrect']}
