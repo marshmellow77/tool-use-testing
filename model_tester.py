@@ -33,7 +33,8 @@ class ModelTester:
         test_case = index + 1
         user_query = record['user_query']
         
-        logger.info(f"\nProcessing test case {test_case}/{len(self.test_dataset)}")
+        # logger.info(f"Processing test case {test_case}/{len(self.test_dataset)}")
+        logger.info(f"Processing test case {record['id']}")
         
         try:
             current_tool = None
