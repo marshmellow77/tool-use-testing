@@ -22,7 +22,7 @@ from vertexai.generative_models import (
     GenerationConfig
 )
 from utils import process_raw_responses
-import weave
+# import weave
 
 # Suppress urllib3 connection pool warnings
 import urllib3
@@ -67,7 +67,7 @@ async def main():
 
     # Initialize Weave with metadata about the test run
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    weave.init(f"tool-selection-testing-{timestamp}")
+    # weave.init(f"tool-selection-testing-{timestamp}")
     
     logger.info(f"\nStarting test run with {args.model_type} model in {args.mode} mode")
     logger.info(f"Loading dataset from: {args.dataset}")
