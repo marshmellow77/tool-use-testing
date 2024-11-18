@@ -9,22 +9,10 @@ import os
 from models import OpenAIModel, GeminiModel
 from evaluator import Evaluator
 from model_tester import ModelTester
-from tools.functions import ALL_FUNCTIONS
 from datetime import datetime
-import csv
 import logging
-from vertexai.generative_models import Tool
-from vertexai.generative_models import FunctionDeclaration
-from vertexai.generative_models import ToolConfig
-from vertexai.generative_models import GenerativeModel
-from vertexai.generative_models import (
-    GenerativeModel,
-    Tool,
-    ToolConfig,
-    GenerationConfig
-)
+
 from utils import process_raw_responses
-# import weave
 
 # Suppress urllib3 connection pool warnings
 import urllib3
@@ -68,9 +56,7 @@ async def main():
                         help='Skip evaluation after running tests')
     args = parser.parse_args()
 
-    # Initialize Weave with metadata about the test run
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # weave.init(f"tool-selection-testing-{timestamp}")
     
     logger.info(f"\nStarting test run with {args.model_type} model in {args.mode} mode")
     logger.info(f"Loading dataset from: {args.dataset}")
