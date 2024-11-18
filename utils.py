@@ -42,6 +42,7 @@ def process_single_run(results):
         # Extract response from model output
         if 'model_response' in record:
             response = record['model_response']
+            # Handle Gemini response
             if 'candidates' in response and response['candidates']:
                 candidate = response['candidates'][0]
                 if 'content' in candidate and 'parts' in candidate['content']:
@@ -55,6 +56,12 @@ def process_single_run(results):
                             }
                         elif 'text' in part:
                             processed_record['model_text'] = part['text']
+            # Handle OpenAI response
+            else:
+                if "model_function_call" in response and response["model_function_call"]:
+                    processed_record['model_function_call'] = response["model_function_call"]
+                elif "full_model_response" in response and response["full_model_response"]:
+                    processed_record['model_text'] = response["full_model_response"]
         
         processed_records.append(processed_record)
     
