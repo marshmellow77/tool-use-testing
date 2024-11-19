@@ -60,11 +60,11 @@ async def main():
                        default='function_call',
                        help='Test mode (default: function_call)')
     parser.add_argument('--openai-model-name',
-                       default='gpt-4-1106-preview',
-                       help='OpenAI model name (default: gpt-4-1106-preview)')
+                       default='gpt-4o-mini',
+                       help='OpenAI model name (default: gpt-4o-mini)')
     parser.add_argument('--gemini-model-id',
-                       default='gemini-1.5-pro-002',
-                       help='Gemini model ID (default: gemini-1.5-pro-002)')
+                       default='gemini-1.5-flash-002',
+                       help='Gemini model ID (default: gemini-1.5-flash-002)')
     parser.add_argument('--openai-api-key',
                        help='OpenAI API key (optional, can use environment variable)')
     parser.add_argument('--semantic-judge-model',
@@ -111,47 +111,82 @@ async def main():
         logger.info(f"Results saved to: {results_dir}")
         return
 
-    # Load dataset
-    dataset = load_dataset(args.dataset)
-    
-    # Initialize model based on type
+    logger.info(f"\nStarting test run with {args.model_type} model in {args.mode} mode")
+    logger.info(f"Loading dataset from: {args.dataset}")
+    test_dataset = load_dataset(args.dataset)
+    logger.info(f"Loaded {len(test_dataset)} test cases")
+
     if args.model_type == 'openai':
+        if not args.openai_api_key:
+            logger.error("Error: OpenAI API key is required for OpenAI model.")
+            return
+        logger.info(f"Initializing OpenAI model: {args.openai_model_name}")
         model = OpenAIModel(
             model_name=args.openai_model_name,
-            api_key=args.openai_api_key
+            api_key=args.openai_api_key,
+            temperature=0
         )
-    else:  # gemini
+    elif args.model_type == 'gemini':
+        logger.info(f"Initializing Gemini model: {args.gemini_model_id}")
         model = GeminiModel(
-            model_id=args.gemini_model_id
+            model_id=args.gemini_model_id,
+            temperature=0
         )
+    else:
+        logger.error("Invalid model type.")
+        return
 
-    # Initialize tester
+    logger.info("Starting test execution...")
     tester = ModelTester(
         model=model,
-        dataset=dataset,
-        test_mode=args.mode,
-        run_both_tool_modes=args.run_both_tool_modes
+        test_dataset=test_dataset,
+        test_mode=args.mode
     )
     
-    # Run tests
-    raw_results = await tester.run_tests()
-    
-    # Save raw results
+    # Step 1: Run tests and save raw results
+    raw_results = {}
+    if args.mode == 'no_function' and args.run_both_tool_modes:
+        logger.info("Running tests in both tool modes...")
+        # Run without tools
+        logger.info("Running tests without tools...")
+        raw_results['no_tools'] = await tester.run_tests(use_tools=False)
+        # Run with tools
+        logger.info("Running tests with tools...")
+        raw_results['with_tools'] = await tester.run_tests(use_tools=True)
+    else:
+        # Regular single run
+        # mode = 'with_tools' if args.mode == 'function_call' or args.run_both_tool_modes else 'no_tools'
+        raw_results['with_tools'] = await tester.run_tests(use_tools=True)
+
     raw_results_file = os.path.join(results_dir, "raw_responses.json")
     with open(raw_results_file, 'w') as f:
         json.dump(raw_results, f, indent=2)
-    logger.info(f"Raw results saved to: {raw_results_file}")
-    
-    # Process raw results
+
+    # Step 2: Process raw results into standardized format
     processed_results = await process_raw_responses(raw_results_file, model)
-    
-    # Save processed results
     processed_results_file = os.path.join(results_dir, "processed_responses.json")
     with open(processed_results_file, 'w') as f:
         json.dump(processed_results, f, indent=2)
-    logger.info(f"Processed results saved to: {processed_results_file}")
+
+    # Save test parameters
+    test_parameters = {
+        "timestamp": timestamp,
+        "test_mode": args.mode,
+        "model_type": args.model_type,
+        "dataset_path": args.dataset,
+        "model_id": args.gemini_model_id if args.model_type == 'gemini' else args.openai_model_name,
+        "semantic_judge_model": args.semantic_judge_model if not args.skip_evaluation else None,
+        "generation_config": {
+            "temperature": 0.0
+        }
+    }
+    
+    parameters_file = os.path.join(results_dir, "test_parameters.json")
+    with open(parameters_file, 'w') as f:
+        json.dump(test_parameters, f, indent=2)
     
     if not args.skip_evaluation:
+        logger.info("Starting evaluation...")
         # Initialize evaluator
         evaluator = Evaluator(
             test_mode=args.mode,
@@ -160,9 +195,11 @@ async def main():
             run_both_tool_modes=args.run_both_tool_modes
         )
         
-        # Run evaluation
         await evaluator.evaluate_results(processed_results_file)
         evaluator.save_results(results_dir)
+    else:
+        logger.info("Skipping evaluation as per user request.")
+
         logger.info(f"Results saved to: {results_dir}")
 
 if __name__ == "__main__":
