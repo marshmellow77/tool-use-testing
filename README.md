@@ -13,7 +13,7 @@ genai-agent-tool-selection-testing/
 ├── utils.py              # Utility functions for processing responses
 ├── tools/
 │   ├── functions.py      # Function definitions for tool calling
-│   └── registry.py       # Function registry and model-specific formatting
+│   └── function_registry.py       # Function registry and model-specific formatting
 ├── datasets/
 │   ├── test_tool_selection.json    # Tool selection test cases
 │   ├── test_clarifying.json        # Clarification response cases
@@ -21,9 +21,11 @@ genai-agent-tool-selection-testing/
 │   ├── test_no_tool.json           # Direct response cases
 │   ├── test_not_supported.json     # Not supported tests
 ├── prompts/
-│   ├── semantic_judge_function_call.txt
-│   ├── semantic_judge_text.txt
+│   ├── semantic_judge_tool_selection.txt
+│   ├── semantic_judge_error.txt
 │   └── semantic_judge_clarifying.txt
+│   ├── semantic_judge_no_tool.txt
+│   └── semantic_judge_not_supported.txt
 ├── results/              # Test run outputs
 ├── requirements.txt
 └── README.md
@@ -185,7 +187,7 @@ You can use the test datasets with your own model and bring the responses back f
    Your responses need to be in a JSON file with the following structure:
    ```json
    {
-       "no_tools": {  // or "with_tools" depending on your mode
+       "with_tools": {  // or "no_tools" depending on your mode
            "test_results": [
                {
                    "id": "A001",
@@ -198,14 +200,13 @@ You can use the test datasets with your own model and bring the responses back f
                            }
                        }
                    },
-                   "model_response": {
-                       "function_call": {
-                           "name": "get_weather",
-                           "arguments": {
-                               "location": "New York"
-                           }
+                   "model_function_call": {
+                       "name": "get_weather",
+                       "arguments": {
+                           "location": "New York"
                        }
-                   }
+                   },
+                   "model_text": null
                }
            ]
        }
@@ -224,9 +225,8 @@ You can use the test datasets with your own model and bring the responses back f
                        "text": "The capital of France is Paris.",
                        "no_function_call": true
                    },
-                   "model_response": {
-                       "text": "Paris is the capital of France."
-                   }
+                   "model_function_call": null,
+                   "model_text": "Paris is the capital of France."
                }
            ]
        }
@@ -239,7 +239,7 @@ You can use the test datasets with your own model and bring the responses back f
    python main.py \
      --eval-only \
      --processed-responses path/to/your/responses.json \
-     --mode no_function \  # or function_call depending on your test type
+     --mode function_call \  # or no_function depending on your test type
      --semantic-judge-model gemini-1.5-pro-002 \
      --semantic-judge-prompt prompts/semantic_judge_not_supported.txt
    ```
