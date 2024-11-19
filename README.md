@@ -140,7 +140,6 @@ registry.register(Function(
 
 2. The function will automatically be available to both Gemini and OpenAI models with the appropriate format conversion handled by the registry.
 
-
 ## End-to-End Process
 
 The testing framework operates in three main stages:
@@ -183,15 +182,67 @@ You can use the test datasets with your own model and bring the responses back f
    - Generate responses in your preferred format
 
 2. **Format Responses**
-   - Convert your model's responses to the framework's format
-   - For function calls: Include function name and arguments
-   - For text responses: Provide direct response text
-   - Follow the structure in example datasets
+   Your responses need to be in a JSON file with the following structure:
+   ```json
+   {
+       "no_tools": {  // or "with_tools" depending on your mode
+           "test_results": [
+               {
+                   "id": "A001",
+                   "user_query": "What's the weather like in New York?",
+                   "ground_truth": {
+                       "function_call": {
+                           "name": "get_weather",
+                           "arguments": {
+                               "location": "New York"
+                           }
+                       }
+                   },
+                   "model_response": {
+                       "function_call": {
+                           "name": "get_weather",
+                           "arguments": {
+                               "location": "New York"
+                           }
+                       }
+                   }
+               }
+           ]
+       }
+   }
+   ```
+
+   For text responses (no function calls), use this format:
+   ```json
+   {
+       "no_tools": {
+           "test_results": [
+               {
+                   "id": "B001",
+                   "user_query": "What is the capital of France?",
+                   "ground_truth": {
+                       "text": "The capital of France is Paris.",
+                       "no_function_call": true
+                   },
+                   "model_response": {
+                       "text": "Paris is the capital of France."
+                   }
+               }
+           ]
+       }
+   }
+   ```
 
 3. **Run Evaluation**
-   - Use the framework's evaluation module independently
-   - Get detailed accuracy metrics and analysis
-   - Compare performance with other models
+   Use the evaluation-only mode to assess your model's responses:
+   ```bash
+   python main.py \
+     --eval-only \
+     --processed-responses path/to/your/responses.json \
+     --mode no_function \  # or function_call depending on your test type
+     --semantic-judge-model gemini-1.5-pro-002 \
+     --semantic-judge-prompt prompts/semantic_judge_not_supported.txt
+   ```
 
 ## Running Tests
 
@@ -203,8 +254,6 @@ python main.py --model-type gemini --mode function_call --dataset datasets/test_
 python main.py --model-type openai --mode no_function --dataset datasets/test_no_tool.json --openai-api-key YOUR_KEY
 ```
 
-
-
 ## Command Line Arguments
 
 The application supports various command-line arguments for customization:
@@ -213,29 +262,39 @@ The application supports various command-line arguments for customization:
 python main.py [arguments]
 ```
 
-### Required Arguments
+### Required Arguments (for model testing mode)
 - `--model-type`: Type of model to test
   - Choices: `gemini`, `openai`
   - Example: `--model-type gemini`
+  - Not required in eval-only mode
 
 - `--dataset`: Path to test dataset file
   - Example: `--dataset datasets/test_tool_selection.json`
+  - Not required in eval-only mode
+
+### Required Arguments (for eval-only mode)
+- `--eval-only`: Run in evaluation-only mode
+  - Flag only, no value needed
+  - Example: `--eval-only`
+
+- `--processed-responses`: Path to your processed responses file
+  - Example: `--processed-responses results/my_responses.json`
 
 ### Optional Arguments
 - `--mode`: Testing mode (default: 'function_call')
   - Choices: `function_call`, `no_function`
   - Example: `--mode no_function`
 
-- `--openai-model-name`: OpenAI model to use (default: 'gpt-4o-mini')
+- `--openai-model-name`: OpenAI model to use (default: 'gpt-4-1106-preview')
   - Example: `--openai-model-name gpt-4`
 
-- `--gemini-model-id`: Gemini model ID (default: 'gemini-1.5-flash-002')
+- `--gemini-model-id`: Gemini model ID (default: 'gemini-1.5-pro-002')
   - Example: `--gemini-model-id gemini-1.0-pro`
 
 - `--openai-api-key`: OpenAI API key (required for OpenAI models)
   - Example: `--openai-api-key sk-...`
 
-- `--semantic-judge-model`: Model for semantic evaluation (default: 'gpt-4')
+- `--semantic-judge-model`: Model for semantic evaluation
   - Example: `--semantic-judge-model gpt-4`
 
 - `--semantic-judge-prompt`: Path to custom semantic judge prompt file
@@ -274,6 +333,16 @@ python main.py \
   --model-type gemini \
   --dataset datasets/test_clarifying.json \
   --skip-evaluation
+```
+
+4. Evaluate your own model responses:
+```bash
+python main.py \
+  --eval-only \
+  --processed-responses results/my_model_responses.json \
+  --mode no_function \
+  --semantic-judge-model gemini-1.5-pro-002 \
+  --semantic-judge-prompt prompts/semantic_judge_not_supported.txt
 ```
 
 ## Requirements
