@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class LLMModel(ABC):
     @abstractmethod
-    async def generate_response(self, user_query, use_tools=False, tool=None):
+    async def generate_response(self, user_query, tool=None):
         pass
 
 class OpenAIModel(LLMModel):
@@ -41,14 +41,14 @@ class OpenAIModel(LLMModel):
         retry=retry_if_exception_type(Exception),
         before_sleep=before_sleep_log(logger, logging.WARNING)
     )
-    async def generate_response(self, user_query, use_tools=False, tool=None):
+    async def generate_response(self, user_query, tool=None):
         messages = [
             {"role": "system", "content": self.system_prompt},
             {"role": "user", "content": user_query}
         ]
 
         try:
-            if use_tools and tool:
+            if tool:
                 tools = []
                 for t in tool:
                     tools.append({
@@ -122,13 +122,13 @@ class GeminiModel(LLMModel):
         retry=retry_if_exception_type((exceptions.ResourceExhausted, exceptions.ServiceUnavailable)),
         before_sleep=before_sleep_log(logger, logging.WARNING)
     )
-    async def generate_response(self, user_query, use_tools=False, tool=None):
+    async def generate_response(self, user_query, tool=None):
         try:
             prompt = Content(
                 role="user",
                 parts=[Part.from_text(user_query)]
             )
-            if use_tools and tool:
+            if tool:
                 response = await self.model.generate_content_async(
                     prompt,
                     generation_config=self.generation_config,

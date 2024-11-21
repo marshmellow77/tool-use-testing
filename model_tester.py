@@ -28,23 +28,17 @@ class ModelTester:
         self.tools = ALL_FUNCTIONS.get_functions_for_model(model_type)
         logger.info(f"Initialized {len(self.tools) if isinstance(self.tools, list) else 'Gemini'} tools")
 
-    async def process_test_case(self, index, record, use_tools):
+    async def process_test_case(self, index, record):
         """Process a single test case and return raw response"""
         test_case = index + 1
         user_query = record['user_query']
         
-        # logger.info(f"Processing test case {test_case}/{len(self.test_dataset)}")
         logger.info(f"Processing test case {record['id']}")
         
         try:
-            current_tool = None
-            if use_tools:
-                current_tool = self.tools  # Always provide all tools when use_tools is True
-            
             response = await self.model.generate_response(
                 user_query, 
-                use_tools=use_tools,
-                tool=current_tool
+                tool=self.tools  # Will be None if not in function_call mode
             )
             
             # Handle different model responses
@@ -109,14 +103,13 @@ class ModelTester:
             logger.error(f"Error processing test case {test_case}: {str(e)}")
             return index, {"error": str(e)}
 
-
-    async def run_tests(self, use_tools=False):
+    async def run_tests(self):
         logger.info(f"\nStarting test execution with {len(self.test_dataset)} test cases")
-        logger.info(f"Mode: {self.test_mode}, Use tools: {use_tools}")
+        logger.info(f"Mode: {self.test_mode}")
 
         # Create tasks for all test cases
         tasks = [
-            self.process_test_case(index, record, use_tools)
+            self.process_test_case(index, record)
             for index, record in enumerate(self.test_dataset)
         ]
 
@@ -128,12 +121,10 @@ class ModelTester:
         model_responses = [r[1] for r in sorted_responses]
 
         logger.info("\nAll test cases processed")
+        
         # Combine model responses with the test dataset
         combined_results = [
             {**record, **response}  # Combine dataset record with model response
             for record, response in zip(self.test_dataset, model_responses)
         ]
-        return {
-            'test_results': combined_results,  # Updated to include combined results
-            # 'model_responses': model_responses,  # Optional, if you still want to keep it
-        }
+        return combined_results

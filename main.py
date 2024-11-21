@@ -1,4 +1,4 @@
-# import sys; sys.argv.extend(["--model-type", "gemini", "--mode", "no_function", "--dataset", "datasets/test_no_tool_debug.json", "--semantic-judge-model", "gemini-1.5-pro-002", "--semantic-judge-prompt", "prompts/semantic_judge_no_tool.txt", "--run-both-tool-modes"])
+# import sys; sys.argv.extend(["--model-type", "gemini", "--mode", "no_function", "--dataset", "datasets/test_no_tool.json", "--semantic-judge-model", "gemini-1.5-pro-002", "--semantic-judge-prompt", "prompts/semantic_judge_no_tool.txt"])
 
 import os
 import json
@@ -71,9 +71,6 @@ async def main():
                        help='Model to use for semantic comparison')
     parser.add_argument('--semantic-judge-prompt',
                        help='Path to semantic judge prompt template')
-    parser.add_argument('--run-both-tool-modes',
-                       action='store_true',
-                       help='Run tests in both with-tools and no-tools modes')
     parser.add_argument('--skip-evaluation',
                        action='store_true',
                        help='Skip the evaluation phase')
@@ -145,22 +142,11 @@ async def main():
     
     # Step 1: Run tests and save raw results
     raw_results = {}
-    if args.mode == 'no_function' and args.run_both_tool_modes:
-        logger.info("Running tests in both tool modes...")
-        # Run without tools
-        logger.info("Running tests without tools...")
-        raw_results['no_tools'] = await tester.run_tests(use_tools=False)
-        # Run with tools
-        logger.info("Running tests with tools...")
-        raw_results['with_tools'] = await tester.run_tests(use_tools=True)
-    else:
-        # Regular single run
-        # mode = 'with_tools' if args.mode == 'function_call' or args.run_both_tool_modes else 'no_tools'
-        raw_results['with_tools'] = await tester.run_tests(use_tools=True)
+    raw_results = await tester.run_tests()
 
     raw_results_file = os.path.join(results_dir, "raw_responses.json")
     with open(raw_results_file, 'w') as f:
-        json.dump(raw_results, f, indent=2)
+        json.dump({'test_results': raw_results}, f, indent=2)
 
     # Step 2: Process raw results into standardized format
     processed_results = await process_raw_responses(raw_results_file, model)
@@ -192,7 +178,6 @@ async def main():
             test_mode=args.mode,
             semantic_judge_model_name=args.semantic_judge_model,
             semantic_judge_prompt=args.semantic_judge_prompt,
-            run_both_tool_modes=args.run_both_tool_modes
         )
         
         await evaluator.evaluate_results(processed_results_file)
