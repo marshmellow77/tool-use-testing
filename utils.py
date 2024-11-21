@@ -6,31 +6,16 @@ async def process_raw_responses(raw_results_file, model):
     with open(raw_results_file, 'r') as f:
         raw_data = json.load(f)
     
-    processed_results = {}
-    
-    # Check if we have multiple modes
-    if any(mode in raw_data for mode in ['no_tools', 'with_tools']):
-        for mode in ['no_tools', 'with_tools']:
-            if mode in raw_data:
-                processed_results[mode] = {
-                    'test_results': process_single_run(raw_data[mode]['test_results'])
-                }
-    else:
-        # Get the single mode that exists
-        mode = next(iter(raw_data))  # Gets the first (and only) key
-        processed_results = {
-            mode: {
-                'test_results': process_single_run(raw_data[mode]['test_results'])
-            }
-        }
-    
-    return processed_results
+    # Process the test results directly without mode wrapping
+    return {
+        'test_results': process_single_run(raw_data['test_results'])
+    }
 
 def process_single_run(results):
     """Process a single run of test results"""
     processed_records = []
     
-    for record in results:  # Iterate through the test_results array
+    for record in results:
         processed_record = {
             'id': record['id'],
             'user_query': record['user_query'],

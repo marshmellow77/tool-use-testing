@@ -12,10 +12,9 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 logger = logging.getLogger(__name__)
 
 class Evaluator:
-    def __init__(self, test_mode, semantic_judge_model_name=None, semantic_judge_prompt=None, run_both_tool_modes=False):
+    def __init__(self, test_mode, semantic_judge_model_name=None, semantic_judge_prompt=None):
         """Initialize the evaluator"""
         self.test_mode = test_mode
-        self.run_both_tool_modes = run_both_tool_modes
         self.total_tests = 0
         self.correct_predictions = 0
         self.incorrect_predictions = 0
@@ -116,31 +115,13 @@ class Evaluator:
         
         with open(results_file_path, 'r') as f:
             results = json.load(f)
-        
-        # Check if we have separate runs for with/without tools
-        if isinstance(results, dict):
-            self.detailed_results = {}
-            
-            # Process each mode's results
-            for mode in results:
-                mode_results = await self._evaluate_single_run(results[mode]['test_results'])
-                self.detailed_results[mode] = mode_results['detailed_results']
-                
-                # Add semantic comparisons if they exist
-                if 'semantic_comparisons' in mode_results:
-                    self.semantic_comparisons.extend(mode_results['semantic_comparisons'])
-            
-            # Calculate overall metrics
-            total_tests = sum(len(results[mode]['test_results']) for mode in results)
-            correct_predictions = sum(
-                sum(1 for r in self.detailed_results[mode] if r['result'] == 'Correct')
-                for mode in self.detailed_results
-            )
-            incorrect_predictions = total_tests - correct_predictions
-            
-            self.total_tests = total_tests
-            self.correct_predictions = correct_predictions
-            self.incorrect_predictions = incorrect_predictions
+
+        evaluation_results = await self._evaluate_single_run(results['test_results'])
+        self.detailed_results = evaluation_results['detailed_results']
+        self.semantic_comparisons = evaluation_results.get('semantic_comparisons', [])
+        self.total_tests = evaluation_results['total_tests']
+        self.correct_predictions = evaluation_results['correct_predictions']
+        self.incorrect_predictions = evaluation_results['incorrect_predictions']
         
         accuracy = (self.correct_predictions / self.total_tests) * 100 if self.total_tests > 0 else 0
         
@@ -364,17 +345,6 @@ class Evaluator:
             # get the text from the first line of the response
             judgment = response.text.strip().split('\n')[0]
             is_equivalent = judgment.lower() == 'equivalent'
-
-            # judgment = response.text.strip().lower()
-            # logger.debug(f"Semantic judge response: {judgment}")
-            
-            # # Check for explicit "different" or "not equivalent" before checking for "equivalent"
-            # is_equivalent = (
-            #     'equivalent' in judgment and 
-            #     'not equivalent' not in judgment and 
-            #     'not semantically equivalent' not in judgment and
-            #     'different' not in judgment
-            # )
             
             comparison_result = {
                 'test_case': test_case,
@@ -404,42 +374,27 @@ class Evaluator:
         os.makedirs(results_dir, exist_ok=True)
         
         # Calculate metrics for each mode
-        no_tools_metrics = {'total': 0, 'correct': 0, 'incorrect': 0}
-        with_tools_metrics = {'total': 0, 'correct': 0, 'incorrect': 0}
+        metrics = {'total': 0, 'correct': 0, 'incorrect': 0}
         
-        # Process results based on modes present in the data
-        all_results = []
-        if 'no_tools' in self.detailed_results:
-            for result in self.detailed_results['no_tools']:
-                result['run_type'] = 'no_tools'
-                no_tools_metrics['total'] += 1
-                if result['result'] == 'Correct':
-                    no_tools_metrics['correct'] += 1
-                else:
-                    no_tools_metrics['incorrect'] += 1
-                all_results.append(result)
-        
-        if 'with_tools' in self.detailed_results:
-            for result in self.detailed_results['with_tools']:
-                result['run_type'] = 'with_tools'
-                with_tools_metrics['total'] += 1
-                if result['result'] == 'Correct':
-                    with_tools_metrics['correct'] += 1
-                else:
-                    with_tools_metrics['incorrect'] += 1
-                all_results.append(result)
+        # Process results
+        for result in self.detailed_results:
+            metrics['total'] += 1
+            if result['result'] == 'Correct':
+                metrics['correct'] += 1
+            else:
+                metrics['incorrect'] += 1
         
         # Sort all results by test case
-        sorted_results = sorted(all_results, key=lambda x: x['test_case'])
+        sorted_results = sorted(self.detailed_results, key=lambda x: x['test_case'])
         
         # Save detailed results to CSV
         results_file = os.path.join(results_dir, "test_results.csv")
         fieldnames = (
             ['test_case', 'user_query', 'expected_function_call', 'model_function_call', 
-             'result', 'mismatch_type', 'reason', 'model_response', 'run_type']
+             'result', 'mismatch_type', 'reason', 'model_response']
             if self.test_mode == 'function_call' else
             ['test_case', 'user_query', 'expected_response', 'model_response', 
-             'result', 'reason', 'run_type']
+             'result', 'reason']
         )
         
         with open(results_file, 'w', newline='', encoding='utf-8') as csvfile:
@@ -457,23 +412,12 @@ class Evaluator:
                     comparison['timestamp'] = datetime.now().isoformat()
                     f.write(json.dumps(comparison) + '\n')
         
-        # Print metrics based on run mode
-        if no_tools_metrics['total'] > 0:
-            no_tools_accuracy = (no_tools_metrics['correct'] / no_tools_metrics['total']) * 100
-            logger.info(f"""
-No Tools Mode:
-Total test cases: {no_tools_metrics['total']}
-Correct predictions: {no_tools_metrics['correct']}
-Incorrect predictions: {no_tools_metrics['incorrect']}
-Accuracy: {no_tools_accuracy:.2f}%
-""")
-        
-        if with_tools_metrics['total'] > 0:
-            with_tools_accuracy = (with_tools_metrics['correct'] / with_tools_metrics['total']) * 100
-            logger.info(f"""
-{'With Tools Mode:' if no_tools_metrics['total'] > 0 else 'Results:'}
-Total test cases: {with_tools_metrics['total']}
-Correct predictions: {with_tools_metrics['correct']}
-Incorrect predictions: {with_tools_metrics['incorrect']}
-Accuracy: {with_tools_accuracy:.2f}%
+        # Print metrics
+        accuracy = (metrics['correct'] / metrics['total']) * 100 if metrics['total'] > 0 else 0
+        logger.info(f"""
+Results:
+Total test cases: {metrics['total']}
+Correct predictions: {metrics['correct']}
+Incorrect predictions: {metrics['incorrect']}
+Accuracy: {accuracy:.2f}%
 """)
