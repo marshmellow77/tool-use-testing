@@ -1,4 +1,4 @@
-# import sys; sys.argv.extend(["--model-type", "gemini", "--mode", "no_function", "--dataset", "datasets/test_no_tool.json", "--semantic-judge-model", "gemini-1.5-pro-002", "--semantic-judge-prompt", "prompts/semantic_judge_no_tool.txt"])
+# import sys; sys.argv.extend(["--model-type", "gemini", "--mode", "no_function", "--dataset", "datasets/test_no_tool.json", "--semantic-judge-model", "gemini-1.5-pro-002"])
 
 import os
 import json
@@ -17,6 +17,14 @@ from utils import process_raw_responses
 # Suppress urllib3 connection pool warnings
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.MaxRetryError)
+
+# Configure root logger first
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Then configure specific loggers
 logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 logging.getLogger('google.auth.transport.requests').setLevel(logging.ERROR)
 logging.getLogger('google.oauth2').setLevel(logging.ERROR)
@@ -28,10 +36,12 @@ logging.getLogger('google.ai.generativelanguage.generative_models._async_engine'
 logging.getLogger('openai').setLevel(logging.WARNING)
 logging.getLogger('httpx').setLevel(logging.WARNING)
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-# logging.basicConfig(level=logging.DEBUG, format='DEBUG: %(message)s')
+# Get logger for main
 logger = logging.getLogger(__name__)
+
+# Set evaluator logger to show only INFO and above (removing DEBUG level)
+evaluator_logger = logging.getLogger('evaluator')
+evaluator_logger.setLevel(logging.INFO)
 
 def load_dataset(dataset_path):
     with open(dataset_path, 'r') as f:
@@ -55,10 +65,6 @@ async def main():
                        help='Path to test dataset (required if not in eval-only mode)')
     
     # Optional arguments
-    parser.add_argument('--mode',
-                       choices=['function_call', 'no_function'],
-                       default='function_call',
-                       help='Test mode (default: function_call)')
     parser.add_argument('--openai-model-name',
                        default='gpt-4o-mini',
                        help='OpenAI model name (default: gpt-4o-mini)')
@@ -69,8 +75,6 @@ async def main():
                        help='OpenAI API key (optional, can use environment variable)')
     parser.add_argument('--semantic-judge-model',
                        help='Model to use for semantic comparison')
-    parser.add_argument('--semantic-judge-prompt',
-                       help='Path to semantic judge prompt template')
     parser.add_argument('--skip-evaluation',
                        action='store_true',
                        help='Skip the evaluation phase')
@@ -99,7 +103,6 @@ async def main():
         evaluator = Evaluator(
             test_mode=args.mode,
             semantic_judge_model_name=args.semantic_judge_model,
-            semantic_judge_prompt=args.semantic_judge_prompt,
             run_both_tool_modes=args.run_both_tool_modes
         )
         
@@ -108,7 +111,7 @@ async def main():
         logger.info(f"Results saved to: {results_dir}")
         return
 
-    logger.info(f"\nStarting test run with {args.model_type} model in {args.mode} mode")
+    logger.info(f"\nStarting test run with {args.model_type} model")
     logger.info(f"Loading dataset from: {args.dataset}")
     test_dataset = load_dataset(args.dataset)
     logger.info(f"Loaded {len(test_dataset)} test cases")
@@ -137,7 +140,6 @@ async def main():
     tester = ModelTester(
         model=model,
         test_dataset=test_dataset,
-        test_mode=args.mode
     )
     
     # Step 1: Run tests and save raw results
@@ -157,7 +159,6 @@ async def main():
     # Save test parameters
     test_parameters = {
         "timestamp": timestamp,
-        "test_mode": args.mode,
         "model_type": args.model_type,
         "dataset_path": args.dataset,
         "model_id": args.gemini_model_id if args.model_type == 'gemini' else args.openai_model_name,
@@ -173,15 +174,17 @@ async def main():
     
     if not args.skip_evaluation:
         logger.info("Starting evaluation...")
-        # Initialize evaluator
-        evaluator = Evaluator(
-            test_mode=args.mode,
-            semantic_judge_model_name=args.semantic_judge_model,
-            semantic_judge_prompt=args.semantic_judge_prompt,
-        )
-        
-        await evaluator.evaluate_results(processed_results_file)
-        evaluator.save_results(results_dir)
+        try:
+            # Initialize evaluator
+            evaluator = Evaluator(
+                semantic_judge_model_name=args.semantic_judge_model
+            )
+            
+            await evaluator.evaluate_results(processed_results_file)
+            evaluator.save_results(results_dir)
+        except ValueError as e:
+            logger.error(f"Evaluation failed: {str(e)}")
+            return
     else:
         logger.info("Skipping evaluation as per user request.")
 

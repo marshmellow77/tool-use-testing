@@ -16,11 +16,10 @@ from google.protobuf.json_format import MessageToDict
 logger = logging.getLogger(__name__)
 
 class ModelTester:
-    def __init__(self, model, test_dataset, test_mode='function_call'):
-        logger.info(f"Initializing ModelTester with mode: {test_mode}")
+    def __init__(self, model, test_dataset):
+        logger.info(f"Initializing ModelTester")
         self.model = model
         self.test_dataset = test_dataset
-        self.test_mode = test_mode
         
         # Initialize tools based on model type
         model_type = "gemini" if isinstance(model, GeminiModel) else "openai"
@@ -32,13 +31,14 @@ class ModelTester:
         """Process a single test case and return raw response"""
         test_case = index + 1
         user_query = record['user_query']
-        
-        logger.info(f"Processing test case {record['id']}")
+        record_type = record['type']
+
+        logger.info(f"Processing test case {record['id']} (type: {record_type})")
         
         try:
             response = await self.model.generate_response(
                 user_query, 
-                tool=self.tools  # Will be None if not in function_call mode
+                tool=self.tools
             )
             
             # Handle different model responses
@@ -105,7 +105,6 @@ class ModelTester:
 
     async def run_tests(self):
         logger.info(f"\nStarting test execution with {len(self.test_dataset)} test cases")
-        logger.info(f"Mode: {self.test_mode}")
 
         # Create tasks for all test cases
         tasks = [

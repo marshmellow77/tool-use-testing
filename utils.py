@@ -18,6 +18,7 @@ def process_single_run(results):
     for record in results:
         processed_record = {
             'id': record['id'],
+            'type': record['type'],
             'user_query': record['user_query'],
             'ground_truth': record['ground_truth'],
             'model_function_call': None,

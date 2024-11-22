@@ -1,0 +1,1717 @@
+[
+  {
+    "id": "A001",
+    "type": "tool_selection",
+    "user_query": "What's the weather like in New York?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_weather",
+        "arguments": {
+          "location": "New York"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A002",
+    "type": "tool_selection",
+    "user_query": "Find me the fastest driving route from Los Angeles to San Francisco.",
+    "ground_truth": {
+      "function_call": {
+        "name": "calculate_route",
+        "arguments": {
+          "start_location": "Los Angeles",
+          "end_location": "San Francisco",
+          "transport_mode": "driving"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A003",
+    "type": "tool_selection",
+    "user_query": "Translate 'Good morning' into French.",
+    "ground_truth": {
+      "function_call": {
+        "name": "translate_text",
+        "arguments": {
+          "text": "Good morning",
+          "target_language": "French"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A004",
+    "type": "tool_selection",
+    "user_query": "Book a hotel in Paris from March 20, 2024 to March 25, 2024 for two people.",
+    "ground_truth": {
+      "function_call": {
+        "name": "book_hotel",
+        "arguments": {
+          "city": "Paris",
+          "check_in_date": "2024-03-20",
+          "check_out_date": "2024-03-25",
+          "guests": 2
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A005",
+    "type": "tool_selection",
+    "user_query": "What's the current stock price of TSLA?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_stock_price",
+        "arguments": {
+          "symbol": "TSLA"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A006",
+    "type": "tool_selection",
+    "user_query": "Remind me to call the doctor at 3 PM on 16th July 2024.",
+    "ground_truth": {
+      "function_call": {
+        "name": "set_reminder",
+        "arguments": {
+          "event": "call the doctor",
+          "datetime": "2024-07-16T15:00:00"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A007",
+    "type": "tool_selection",
+    "user_query": "Find me a good sushi place in Toronto.",
+    "ground_truth": {
+      "function_call": {
+        "name": "find_restaurant",
+        "arguments": {
+          "cuisine_type": "sushi",
+          "location": "toronto"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A008",
+    "type": "tool_selection",
+    "user_query": "Convert 100 miles to kilometers.",
+    "ground_truth": {
+      "function_call": {
+        "name": "convert_units",
+        "arguments": {
+          "value": 100,
+          "from_unit": "miles",
+          "to_unit": "kilometers"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A009",
+    "type": "tool_selection",
+    "user_query": "Show me the latest sports news.",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_news_headlines",
+        "arguments": {
+          "topic": "sports"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A010",
+    "type": "tool_selection",
+    "user_query": "Email sarah@example.com to confirm our meeting on March 15, 2024.",
+    "ground_truth": {
+      "function_call": {
+        "name": "send_email",
+        "arguments": {
+          "recipient": "sarah@example.com",
+          "subject": "Meeting Confirmation",
+          "message": "Confirming our meeting on March 15, 2024."
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A011",
+    "type": "tool_selection",
+    "user_query": "What's the current time in Tokyo?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_current_time",
+        "arguments": {
+          "timezone": "Asia/Tokyo"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A012",
+    "type": "tool_selection",
+    "user_query": "What's the definition of 'quintessential'?",
+    "ground_truth": {
+      "function_call": {
+        "name": "lookup_definition",
+        "arguments": {
+          "word": "quintessential"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A013",
+    "type": "tool_selection",
+    "user_query": "I need to find a cheap Italian restaurant in New York.",
+    "ground_truth": {
+      "function_call": {
+        "name": "find_restaurant",
+        "arguments": {
+          "cuisine_type": "Italian",
+          "location": "New York",
+          "price_range": "$"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A014",
+    "type": "tool_selection",
+    "user_query": "What's on my calendar for 19 November 2023?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_calendar_events",
+        "arguments": {
+          "date": "2023-11-19"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A015",
+    "type": "tool_selection",
+    "user_query": "How's the traffic from Shoreditch to the Heathrow airport?",
+    "ground_truth": {
+      "function_call": {
+        "name": "check_traffic",
+        "arguments": {
+          "route": "Shoreditch to Heathrow Airport"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A016",
+    "type": "tool_selection",
+    "user_query": "Solve for x: 2x + 3 = 7.",
+    "ground_truth": {
+      "function_call": {
+        "name": "solve_math_problem",
+        "arguments": {
+          "problem": "2x + 3 = 7"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A017",
+    "type": "tool_selection",
+    "user_query": "What's Apple's stock price today?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_stock_price",
+        "arguments": {
+          "symbol": "AAPL"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A018",
+    "type": "tool_selection",
+    "user_query": "Translate 'Thank you' into Japanese.",
+    "ground_truth": {
+      "function_call": {
+        "name": "translate_text",
+        "arguments": {
+          "text": "Thank you",
+          "target_language": "Japanese"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A019",
+    "type": "tool_selection",
+    "user_query": "What time is it in Sydney?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_current_time",
+        "arguments": {
+          "timezone": "Australia/Sydney"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A020",
+    "type": "tool_selection",
+    "user_query": "How many feet are in 3 meters?",
+    "ground_truth": {
+      "function_call": {
+        "name": "convert_units",
+        "arguments": {
+          "value": 3,
+          "from_unit": "meters",
+          "to_unit": "feet"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A021",
+    "type": "tool_selection",
+    "user_query": "Set a reminder to buy groceries at 5 PM on 12 November 2024.",
+    "ground_truth": {
+      "function_call": {
+        "name": "set_reminder",
+        "arguments": {
+          "event": "buy groceries",
+          "datetime": "2024-11-12T17:00:00"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A022",
+    "type": "tool_selection",
+    "user_query": "Is it raining in London right now?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_weather",
+        "arguments": {
+          "location": "London"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A023",
+    "type": "tool_selection",
+    "user_query": "Find a Mexican restaurant in San Diego.",
+    "ground_truth": {
+      "function_call": {
+        "name": "find_restaurant",
+        "arguments": {
+          "cuisine_type": "Mexican",
+          "location": "San Diego"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A024",
+    "type": "tool_selection",
+    "user_query": "Give me the latest news in technology.",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_news_headlines",
+        "arguments": {
+          "topic": "technology"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A025",
+    "type": "tool_selection",
+    "user_query": "Plan a walking route from Central Park to Times Square.",
+    "ground_truth": {
+      "function_call": {
+        "name": "calculate_route",
+        "arguments": {
+          "start_location": "Central Park",
+          "end_location": "Times Square",
+          "transport_mode": "walking"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A026",
+    "type": "tool_selection",
+    "user_query": "Define 'effervescent'.",
+    "ground_truth": {
+      "function_call": {
+        "name": "lookup_definition",
+        "arguments": {
+          "word": "effervescent"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A027",
+    "type": "tool_selection",
+    "user_query": "What's the stock price of GOOGL?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_stock_price",
+        "arguments": {
+          "symbol": "GOOGL"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A028",
+    "type": "tool_selection",
+    "user_query": "Translate 'Where is the train station?' into German.",
+    "ground_truth": {
+      "function_call": {
+        "name": "translate_text",
+        "arguments": {
+          "text": "Where is the train station?",
+          "target_language": "German"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A029",
+    "type": "tool_selection",
+    "user_query": "Do I have any meetings on 15 November 2024?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_calendar_events",
+        "arguments": {
+          "date": "2024-11-15"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A030",
+    "type": "tool_selection",
+    "user_query": "What is the derivative of x^2?",
+    "ground_truth": {
+      "function_call": {
+        "name": "solve_math_problem",
+        "arguments": {
+          "problem": "derivative of x^2"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A031",
+    "type": "tool_selection",
+    "user_query": "Is it sunny in Miami?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_weather",
+        "arguments": {
+          "location": "Miami"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A032",
+    "type": "tool_selection",
+    "user_query": "Remind me to water the plants on 27 March 2024 at 8 AM.",
+    "ground_truth": {
+      "function_call": {
+        "name": "set_reminder",
+        "arguments": {
+          "event": "water the plants",
+          "datetime": "2024-03-27T08:00:00"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A033",
+    "type": "tool_selection",
+    "user_query": "What does 'serendipity' mean?",
+    "ground_truth": {
+      "function_call": {
+        "name": "lookup_definition",
+        "arguments": {
+          "word": "serendipity"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A034",
+    "type": "tool_selection",
+    "user_query": "What's the current weather for Chicago?",
+    "ground_truth": {
+      "function_call": {
+        "name": "get_weather",
+        "arguments": {
+          "location": "Chicago"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A035",
+    "type": "tool_selection",
+    "user_query": "Find me a sushi restaurant within walking distance of the Louvre that's in the moderate price range.",
+    "ground_truth": {
+      "function_call": {
+        "name": "find_restaurant",
+        "arguments": {
+          "cuisine_type": "sushi",
+          "location": "Louvre, Paris",
+          "price_range": "$$"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A036",
+    "type": "tool_selection",
+    "user_query": "Calculate a scenic walking route from Westminster Abbey to Tower Bridge that passes by the Thames River.",
+    "ground_truth": {
+      "function_call": {
+        "name": "calculate_route",
+        "arguments": {
+          "start_location": "Westminster Abbey",
+          "end_location": "Tower Bridge",
+          "transport_mode": "walking"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A037",
+    "type": "tool_selection",
+    "user_query": "Send a detailed email to team@company.com explaining that I'll be 15 minutes late to tomorrow's quarterly budget review meeting due to a doctor's appointment.",
+    "ground_truth": {
+      "function_call": {
+        "name": "send_email",
+        "arguments": {
+          "recipient": "team@company.com",
+          "subject": "Slight Delay - Quarterly Budget Review Meeting",
+          "message": "I wanted to inform you that I will be arriving 15 minutes late to tomorrow's quarterly budget review meeting due to a scheduled doctor's appointment."
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A038",
+    "type": "tool_selection",
+    "user_query": "Set a reminder for taking my heart medication on 19 March 2024 at 8 AM.",
+    "ground_truth": {
+      "function_call": {
+        "name": "set_reminder",
+        "arguments": {
+          "event": "take heart medication",
+          "datetime": "2024-03-19T08:00:00"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A039",
+    "type": "tool_selection",
+    "user_query": "Solve the indefinite integral of 3x\u00b2sin(x) + 4x\u221a(x-1) with respect to x.",
+    "ground_truth": {
+      "function_call": {
+        "name": "solve_math_problem",
+        "arguments": {
+          "problem": "indefinite integral of 3x\u00b2sin(x) + 4x\u221a(x-1) dx"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A040",
+    "type": "tool_selection",
+    "user_query": "Check the rush hour traffic conditions along the M25 orbital, specifically between Heathrow and Dartford Crossing.",
+    "ground_truth": {
+      "function_call": {
+        "name": "check_traffic",
+        "arguments": {
+          "route": "M25 between Heathrow and Dartford Crossing"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A041",
+    "type": "tool_selection",
+    "user_query": "Book a hotel suite in Santorini for a honeymoon stay from 15 September 2024 to 22 September 2024.",
+    "ground_truth": {
+      "function_call": {
+        "name": "book_hotel",
+        "arguments": {
+          "city": "Santorini",
+          "check_in_date": "2024-09-15",
+          "check_out_date": "2024-09-22",
+          "guests": 2
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "A042",
+    "type": "tool_selection",
+    "user_query": "Convert 98.6\u00b0F to Celsius for my thermodynamics lab report.",
+    "ground_truth": {
+      "function_call": {
+        "name": "convert_units",
+        "arguments": {
+          "value": 98.6,
+          "from_unit": "fahrenheit",
+          "to_unit": "celsius"
+        }
+      },
+      "text": null,
+      "expected_response_type": "function_call"
+    }
+  },
+  {
+    "id": "B001",
+    "type": "text_response",
+    "user_query": "What is the capital of France?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The capital of France is Paris.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B002",
+    "type": "text_response",
+    "user_query": "Who wrote Romeo and Juliet?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Romeo and Juliet was written by William Shakespeare.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B003",
+    "type": "text_response",
+    "user_query": "What is the chemical symbol for gold?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The chemical symbol for gold is Au.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B004",
+    "type": "text_response",
+    "user_query": "Who was the first person to walk on the moon?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Neil Armstrong was the first person to walk on the moon on July 20, 1969.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B005",
+    "type": "text_response",
+    "user_query": "What is the speed of light?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The speed of light in a vacuum is approximately 299,792,458 meters per second.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B006",
+    "type": "text_response",
+    "user_query": "Who painted the Mona Lisa?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The Mona Lisa was painted by Leonardo da Vinci.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B007",
+    "type": "text_response",
+    "user_query": "What is the largest planet in our solar system?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Jupiter is the largest planet in our solar system.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B008",
+    "type": "text_response",
+    "user_query": "Who invented the telephone?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Alexander Graham Bell invented the telephone in 1876.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B009",
+    "type": "text_response",
+    "user_query": "What is the chemical formula for water?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The chemical formula for water is H2O.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B010",
+    "type": "text_response",
+    "user_query": "What is the capital of Japan?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The capital of Japan is Tokyo.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B011",
+    "type": "text_response",
+    "user_query": "How many bones are in the adult human body?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The adult human body has 206 bones.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B012",
+    "type": "text_response",
+    "user_query": "What planet is known as the Red Planet?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Mars is known as the Red Planet.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B013",
+    "type": "text_response",
+    "user_query": "What is the main ingredient in guacamole?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The main ingredient in guacamole is avocado.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B014",
+    "type": "text_response",
+    "user_query": "How many sides does a hexagon have?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "A hexagon has six sides.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B015",
+    "type": "text_response",
+    "user_query": "What is the primary language spoken in Brazil?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The primary language spoken in Brazil is Portuguese.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B016",
+    "type": "text_response",
+    "user_query": "What is the hardest natural substance on Earth?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Diamond is the hardest natural substance on Earth.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B017",
+    "type": "text_response",
+    "user_query": "Which animal is known as the King of the Jungle?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The lion is known as the King of the Jungle.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B018",
+    "type": "text_response",
+    "user_query": "What is the largest desert in the world?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The Antarctic Desert is the largest desert in the world.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B019",
+    "type": "text_response",
+    "user_query": "Who was the first woman to win a Nobel Prize?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Marie Curie was the first woman to win a Nobel Prize, receiving it in Physics in 1903.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B020",
+    "type": "text_response",
+    "user_query": "How many chromosomes do humans have?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Humans have 23 pairs of chromosomes, for a total of 46 chromosomes.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B021",
+    "type": "text_response",
+    "user_query": "What is the longest river in the world?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The Nile River is the longest river in the world.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B022",
+    "type": "text_response",
+    "user_query": "What is the main component of the Sun?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The main component of the Sun is hydrogen.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B023",
+    "type": "text_response",
+    "user_query": "Which is the smallest bird in the world?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The Bee Hummingbird is the smallest bird in the world.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B024",
+    "type": "text_response",
+    "user_query": "What is the most abundant element in Earth's atmosphere?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Nitrogen is the most abundant element in Earth's atmosphere.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B025",
+    "type": "text_response",
+    "user_query": "What is the Great Wall of China made of?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The Great Wall of China is primarily made of stone, brick, wood, and rammed earth.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B026",
+    "type": "text_response",
+    "user_query": "Which instrument has 88 keys?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "A standard piano has 88 keys.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B027",
+    "type": "text_response",
+    "user_query": "What is the study of fossils called?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The study of fossils is called paleontology.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "B028",
+    "type": "text_response",
+    "user_query": "What is the human body's largest organ?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "The skin is the human body's largest organ.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E001",
+    "type": "not_supported",
+    "user_query": "Play some jazz music.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot play music.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E002",
+    "type": "not_supported",
+    "user_query": "Turn off the living room lights.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I don't have the capability to control smart home devices.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E003",
+    "type": "not_supported",
+    "user_query": "Order me a pepperoni pizza for delivery.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I can't place orders or make purchases.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E004",
+    "type": "not_supported",
+    "user_query": "Start a video call with Sarah.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I cannot initiate video calls.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E005",
+    "type": "not_supported",
+    "user_query": "What's the status of my flight AA123?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I don't have access to real-time flight information.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E006",
+    "type": "not_supported",
+    "user_query": "Add milk to my shopping list.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I can't manage shopping lists.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E007",
+    "type": "not_supported",
+    "user_query": "Remind me to stretch every hour.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I can only set single reminders for specific times.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E008",
+    "type": "not_supported",
+    "user_query": "Activate airplane mode.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I cannot control device settings.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E009",
+    "type": "not_supported",
+    "user_query": "Read my new text messages.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I don't have access to your text messages.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E010",
+    "type": "not_supported",
+    "user_query": "Book me a flight to Tokyo next Monday.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot book flights.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E011",
+    "type": "not_supported",
+    "user_query": "What's playing at the local cinema tonight?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I don't have access to real-time movie listings.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E012",
+    "type": "not_supported",
+    "user_query": "Control the thermostat and set it to 72 degrees.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I can't control home devices like thermostats.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E013",
+    "type": "not_supported",
+    "user_query": "Can you show me cat videos?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I can't display videos.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E014",
+    "type": "not_supported",
+    "user_query": "Start recording audio.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I don't have the capability to record audio.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E015",
+    "type": "not_supported",
+    "user_query": "Open the presentation file I was working on.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I can't access or open files.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E016",
+    "type": "not_supported",
+    "user_query": "Locate my phone.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I can't perform device location services.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E017",
+    "type": "not_supported",
+    "user_query": "Reserve a table at The French Laundry for tonight.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot make reservations.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E018",
+    "type": "not_supported",
+    "user_query": "Set my alarm for 7 AM daily.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but I can only set reminders for specific times.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "E019",
+    "type": "not_supported",
+    "user_query": "Update my social media status to 'Feeling happy!'",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I can't interact with social media accounts.",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D001",
+    "type": "error",
+    "user_query": "Book me a hotel in London from February 30th to March 5th, 2025.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but February doesn't have a 30th day. Could you please provide valid check-in and check-out dates?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D002",
+    "type": "error",
+    "user_query": "Set a reminder to attend the meeting on April 31st, 2024.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Apologies, but April has only 30 days. Could you provide a valid date for the reminder?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D003",
+    "type": "error",
+    "user_query": "Convert 100 meters into seconds.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but converting meters to seconds is not possible. Could you specify a different unit for conversion?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D004",
+    "type": "error",
+    "user_query": "Get the current weather in Atlantis.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I couldn't find a location named Atlantis. Could you please provide a valid location?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D005",
+    "type": "error",
+    "user_query": "Translate 'Hello' into Martian language.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot translate into Martian as it's not a recognized language. Could you specify a different target language?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D006",
+    "type": "error",
+    "user_query": "Send an email to null with the subject 'Test'.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "It seems the recipient's email address is missing or invalid. Could you please provide a valid email address?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D007",
+    "type": "error",
+    "user_query": "Find me a restaurant that serves unicorn meat.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but unicorns are mythical creatures. Could you specify a different cuisine or dish you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D008",
+    "type": "error",
+    "user_query": "Check the traffic conditions on the moon.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot provide traffic information for the moon. Could you specify a location on Earth?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D009",
+    "type": "error",
+    "user_query": "Set a reminder for the meeting yesterday at 3 PM.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "It seems the specified time is in the past. Could you provide a future date and time for the reminder?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D010",
+    "type": "error",
+    "user_query": "Get the stock price for XYZ123.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I couldn't find a stock with the symbol 'XYZ123'. Could you please provide a valid stock symbol?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D011",
+    "type": "error",
+    "user_query": "Solve for x: x + 2 = x + 2.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "This equation has infinitely many solutions since both sides are identical. Is there another problem you'd like help with?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D012",
+    "type": "error",
+    "user_query": "Book a hotel room in Narnia for next weekend.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I couldn't find a real location named Narnia. Could you please provide a valid city or destination?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D013",
+    "type": "error",
+    "user_query": "Get my calendar events for February 29th, 2023.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but February 2023 doesn't have a 29th day as it's not a leap year. Could you specify a valid date?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D014",
+    "type": "error",
+    "user_query": "Find restaurants with a rating of 6 stars.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Restaurant ratings typically go up to 5 stars. Could you specify a rating within that range?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D015",
+    "type": "error",
+    "user_query": "Send an email to support@company with no subject and message.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Could you please provide a subject and message text for the email?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D016",
+    "type": "error",
+    "user_query": "Set a reminder to travel back in time tomorrow.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but time travel isn't possible. Could you clarify or provide a different reminder?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D017",
+    "type": "error",
+    "user_query": "Get the definition of 'asdfghjkl'.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but 'asdfghjkl' doesn't appear to be a recognized word. Could you check the spelling or provide another word?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D018",
+    "type": "error",
+    "user_query": "What's the weather in the center of the Earth?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot retrieve weather information for the center of the Earth. Could you specify a surface location?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D019",
+    "type": "error",
+    "user_query": "Convert 50 apples to oranges.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot convert apples to oranges. Could you provide units of measurement you'd like to convert between?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D020",
+    "type": "error",
+    "user_query": "Set an alarm for 25:00 tonight.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but there are only 24 hours in a day. Could you provide a valid time for the alarm?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D021",
+    "type": "error",
+    "user_query": "Find me a restaurant with negative five-star reviews.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Ratings cannot be negative. Would you like to search for restaurants with low ratings instead?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D022",
+    "type": "error",
+    "user_query": "Get the current time on Mars.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but standard Earth time zones don't apply to Mars. Could you specify a location on Earth?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D023",
+    "type": "error",
+    "user_query": "Check traffic conditions for the Bermuda Triangle.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot provide traffic information for the Bermuda Triangle. Could you specify a different location?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D024",
+    "type": "error",
+    "user_query": "Send an email to john@example.com but make sure it arrives yesterday.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I cannot send emails to arrive in the past. Would you like me to send it now?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D025",
+    "type": "error",
+    "user_query": "Get stock prices for companies on Planet X.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I can only retrieve stock information for companies listed on Earth exchanges. Could you provide a valid stock symbol?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D026",
+    "type": "error",
+    "user_query": "Solve for y in the equation y = x + z, but I won't tell you x or z.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I need the values of x and z to solve for y. Could you provide those values?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D027",
+    "type": "error",
+    "user_query": "Book a hotel room in Gotham City from March 1st to March 5th.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but I couldn't find a real location named Gotham City. Could you provide a valid city?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "D028",
+    "type": "error",
+    "user_query": "Translate 'Bonjour' into 'Blahblah' language.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'm sorry, but 'Blahblah' isn't a recognized language. Could you specify a valid target language?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C001",
+    "type": "clarifying",
+    "user_query": "Set a reminder for my meeting.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, when would you like me to set the reminder for your meeting?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C002",
+    "type": "clarifying",
+    "user_query": "Find me a restaurant.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! What type of cuisine and location are you interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C003",
+    "type": "clarifying",
+    "user_query": "Translate this text for me.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Of course! Could you please provide the text you'd like me to translate and the target language?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C004",
+    "type": "clarifying",
+    "user_query": "What's the weather like?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please specify the location you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C005",
+    "type": "clarifying",
+    "user_query": "Send an email.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Absolutely! Could you please provide the recipient's email address, subject, and message?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C006",
+    "type": "clarifying",
+    "user_query": "Calculate a route for me.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please provide the start and end locations and your preferred mode of transportation?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C007",
+    "type": "clarifying",
+    "user_query": "Convert this measurement.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please specify the value and the units you'd like to convert from and to?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C008",
+    "type": "clarifying",
+    "user_query": "Get me the latest news.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'd be happy to! Is there a specific topic or category you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C009",
+    "type": "clarifying",
+    "user_query": "Book a hotel room.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please provide the city, check-in and check-out dates, and the number of guests?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C010",
+    "type": "clarifying",
+    "user_query": "What's the stock price?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please specify the stock symbol you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C011",
+    "type": "clarifying",
+    "user_query": "Solve this math problem.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'd be happy to help! Could you please provide the math problem you'd like me to solve?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C012",
+    "type": "clarifying",
+    "user_query": "Check my calendar.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, for which date would you like me to check your calendar events?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C013",
+    "type": "clarifying",
+    "user_query": "Get the current time.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please specify the timezone or city you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C014",
+    "type": "clarifying",
+    "user_query": "Look up this word for me.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Of course! Could you please tell me the word you'd like me to look up?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C015",
+    "type": "clarifying",
+    "user_query": "Check the traffic conditions.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please provide the route or area you'd like me to check traffic for?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C016",
+    "type": "clarifying",
+    "user_query": "Find me a good place to eat sushi.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please specify the location where you're looking for sushi restaurants?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C017",
+    "type": "clarifying",
+    "user_query": "Translate 'Hello' for me.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, which language would you like 'Hello' translated into?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C018",
+    "type": "clarifying",
+    "user_query": "Set a reminder to pick up groceries.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Absolutely! When would you like me to set the reminder for?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C019",
+    "type": "clarifying",
+    "user_query": "What's on my schedule?",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'd be happy to check. Is there a specific date or time range you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C020",
+    "type": "clarifying",
+    "user_query": "Convert 100.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please specify the units you'd like to convert from and to?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C021",
+    "type": "clarifying",
+    "user_query": "Find a math solution for me.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please provide the math problem you'd like me to solve?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C022",
+    "type": "clarifying",
+    "user_query": "Get the weather forecast for tomorrow.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please specify the location you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C023",
+    "type": "clarifying",
+    "user_query": "Email my colleague.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Absolutely! Could you please provide your colleague's email address and the message you'd like to send?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C024",
+    "type": "clarifying",
+    "user_query": "Define this term for me.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Of course! Could you please tell me the term you'd like me to define?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C025",
+    "type": "clarifying",
+    "user_query": "Plan a route to the nearest gas station.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please provide your current location and preferred mode of transportation?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C026",
+    "type": "clarifying",
+    "user_query": "Get me stock updates.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please specify which stock symbols you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C027",
+    "type": "clarifying",
+    "user_query": "Set an appointment.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please provide the date, time, and details of the appointment?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C028",
+    "type": "clarifying",
+    "user_query": "Check today's news.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "I'd be happy to! Is there a specific topic or category you're interested in?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C029",
+    "type": "clarifying",
+    "user_query": "Solve an equation for me.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Sure, could you please provide the equation you'd like me to solve?",
+      "expected_response_type": "text"
+    }
+  },
+  {
+    "id": "C030",
+    "type": "clarifying",
+    "user_query": "Find traffic updates.",
+    "ground_truth": {
+      "function_call": null,
+      "text": "Certainly! Could you please specify the route or area you're interested in?",
+      "expected_response_type": "text"
+    }
+  }
+]
