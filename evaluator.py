@@ -12,7 +12,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 logger = logging.getLogger(__name__)
 
 class Evaluator:
-    def __init__(self, semantic_judge_model_name=None):
+    def __init__(self, semantic_judge_model_name="gemini-1.5-pro-002"):
         """Initialize the evaluator"""
         self.total_tests = 0
         self.correct_predictions = 0
