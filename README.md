@@ -6,20 +6,16 @@ A framework for testing and evaluating LLM's capabilities to select tools and re
 
 ```
 genai-agent-tool-selection-testing/
-├── main.py                 # Main entry point and test orchestration
+├── main.py                # Main entry point and test orchestration
 ├── models.py              # Model implementations (OpenAI, Gemini)
 ├── evaluator.py           # Evaluation logic and metrics
 ├── model_tester.py        # Test execution engine
-├── utils.py              # Utility functions for processing responses
+├── utils.py               # Utility functions for processing responses
 ├── tools/
 │   ├── functions.py      # Function definitions for tool calling
 │   └── function_registry.py       # Function registry and model-specific formatting
 ├── datasets/
-│   ├── test_tool_selection.json    # Tool selection test cases
-│   ├── test_clarifying.json        # Clarification response cases
-│   ├── test_error.json             # Error handling cases
-│   ├── test_no_tool.json           # Direct response cases
-│   ├── test_not_supported.json     # Not supported tests
+│   ├── test_dataset.json  # Combined test dataset
 ├── prompts/
 │   ├── semantic_judge_tool_selection.txt
 │   ├── semantic_judge_error.txt
@@ -37,29 +33,29 @@ genai-agent-tool-selection-testing/
 
 ## Test Datasets
 
-The framework includes several specialized test datasets:
+The framework includes several specialized test datasets that are combined into a unified test dataset:
 
-1. **Tool Selection Tests** (`test_tool_selection.json`)
+1. **Tool Selection Tests**
    - Tests model's ability to select appropriate functions
    - Includes ground truth function calls with arguments
    - Covers various domains (weather, navigation, translation, etc.)
 
-2. **Clarification Tests** (`test_clarifying.json`)
+2. **Clarification Tests**
    - Tests model's ability to request missing information
    - Validates appropriate clarifying questions
    - Ensures models don't make assumptions with incomplete data
 
-3. **Error Handling Tests** (`test_error.json`)
+3. **Error Handling Tests**
    - Tests model's response to invalid inputs
    - Includes cases like invalid dates, non-existent locations
    - Validates appropriate error messages
 
-4. **Direct Response Tests** (`test_no_tool.json`)
+4. **Direct Response Tests**
    - Tests model's knowledge-based responses
    - No function calling required
    - Factual questions with clear ground truth
 
-5. **Not Supported Tests** (`test_not_supported.json`)
+5. **Not Supported Tests**
    - Tests model's ability to gracefully handle unsupported actions
    - Includes requests for device control, media playback, real-time data
    - Validates clear communication of limitations
@@ -147,10 +143,10 @@ registry.register(Function(
 The testing framework operates in three main stages:
 
 1. **Model Testing**
-   - Loads test cases from selected dataset
+   - Loads test cases from dataset
    - Initializes model (Gemini or OpenAI) with appropriate configuration
    - Executes each test case, capturing raw model responses
-   - Handles both function calling and direct response modes
+   - Handles both function calls and text responses based on expected_response_type
    - Manages API interactions and error handling
 
 2. **Response Processing**
@@ -161,75 +157,69 @@ The testing framework operates in three main stages:
 
 3. **Evaluation**
    - Performs multi-level response validation:
-     a. Exact Match Check
+     a. Response Type Check
+        - Verifies if model provided expected response type (function call or text)
+     b. Exact Match Check
         - For function calls: Matches function name and arguments exactly
         - For text responses: Direct string comparison
-     b. Semantic Evaluation
-        - Uses LLM (default: GPT-4) as semantic judge
+     c. Semantic Evaluation
+        - Uses LLM as semantic judge with type-specific prompts
         - Evaluates response meaning and intent
         - Considers variations in phrasing and format
-     c. Mismatch Analysis
+     d. Mismatch Analysis
         - Categorizes types of mismatches
         - Identifies specific differences in function calls
         - Analyzes parameter variations
-   - Generates comprehensive metrics and reports
 
 ## Using Custom Model Responses
 
 You can use the test datasets with your own model and bring the responses back for evaluation:
 
 1. **Load and Use Test Dataset**
-   - Import test cases from provided JSON files
+   - Import test cases from the dataset
    - Use cases to test your own model implementation
-   - Generate responses in your preferred format
+   - Generate responses in the standardized format
 
 2. **Format Responses**
    Your responses need to be in a JSON file with the following structure:
    ```json
    {
-       "with_tools": {  // or "no_tools" depending on your mode
-           "test_results": [
-               {
-                   "id": "A001",
-                   "user_query": "What's the weather like in New York?",
-                   "ground_truth": {
-                       "function_call": {
-                           "name": "get_weather",
-                           "arguments": {
-                               "location": "New York"
-                           }
-                       }
-                   },
-                   "model_function_call": {
+       "test_results": [
+           {
+               "id": "A001",
+               "type": "tool_selection",
+               "user_query": "What's the weather like in New York?",
+               "ground_truth": {
+                   "function_call": {
                        "name": "get_weather",
                        "arguments": {
                            "location": "New York"
                        }
                    },
-                   "model_text": null
-               }
-           ]
-       }
-   }
-   ```
-
-   For text responses (no function calls), use this format:
-   ```json
-   {
-       "no_tools": {
-           "test_results": [
-               {
-                   "id": "B001",
-                   "user_query": "What is the capital of France?",
-                   "ground_truth": {
-                       "text": "The capital of France is Paris.",
-                       "no_function_call": true
-                   },
-                   "model_function_call": null,
-                   "model_text": "Paris is the capital of France."
-               }
-           ]
-       }
+                   "text": null,
+                   "expected_response_type": "function_call"
+               },
+               "model_function_call": {
+                   "name": "get_weather",
+                   "arguments": {
+                       "location": "New York"
+                   }
+               },
+               "model_text": null
+           },
+           {
+               "id": "B001",
+               "type": "text_response",
+               "user_query": "What is the capital of France?",
+               "ground_truth": {
+                   "function_call": null,
+                   "text": "The capital of France is Paris.",
+                   "expected_response_type": "text"
+               },
+               "model_function_call": null,
+               "model_text": "Paris is the capital of France."
+           }
+       ]
    }
    ```
 
@@ -239,9 +229,7 @@ You can use the test datasets with your own model and bring the responses back f
    python main.py \
      --eval-only \
      --processed-responses path/to/your/responses.json \
-     --mode function_call \  # or no_function depending on your test type
-     --semantic-judge-model gemini-1.5-pro-002 \
-     --semantic-judge-prompt prompts/semantic_judge_not_supported.txt
+     --semantic-judge-model gemini-1.5-flash-002
    ```
 
 ## Running Tests
@@ -258,16 +246,8 @@ python main.py --model-type openai --mode no_function --dataset datasets/test_no
 
 The application supports various command-line arguments for customization:
 
-```bash
-python main.py [arguments]
-```
-
-### Required Arguments (for model testing mode)
-- `--model-type`: Type of model to test
-  - Choices: `gemini`, `openai`
-  - Example: `--model-type gemini`
-  - Not required in eval-only mode
-
+### Required Arguments
+- `--model-type`: Type of model to test (`gemini` or `openai`)
 - `--dataset`: Path to test dataset file
   - Example: `--dataset datasets/test_tool_selection.json`
   - Not required in eval-only mode
@@ -344,7 +324,7 @@ python main.py \
 ## Requirements
 
 - Python 3.7 or higher
-- OpenAI API key (for OpenAI models and semantic judge)
+- OpenAI API key (for OpenAI models)
 - Google Cloud credentials (for Gemini model)
 - Required packages in requirements.txt
 
