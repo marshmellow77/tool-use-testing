@@ -300,10 +300,6 @@ python main.py [arguments]
 - `--semantic-judge-prompt`: Path to custom semantic judge prompt file
   - Example: `--semantic-judge-prompt prompts/custom_prompt.txt`
 
-- `--run-both-tool-modes`: Run tests both with and without tools in no_function mode
-  - Flag only, no value needed
-  - Example: `--run-both-tool-modes`
-
 - `--skip-evaluation`: Skip the evaluation phase after running tests
   - Flag only, no value needed
   - Example: `--skip-evaluation`
