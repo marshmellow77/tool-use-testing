@@ -11,6 +11,9 @@ from evaluator import Evaluator
 from model_tester import ModelTester
 from datetime import datetime
 import logging
+import vertexai
+
+vertexai.init(project="heikohotz-genai-sa", location="us-central1")
 
 from utils import process_raw_responses
 
@@ -74,6 +77,7 @@ async def main():
     parser.add_argument('--openai-api-key',
                        help='OpenAI API key (optional, can use environment variable)')
     parser.add_argument('--semantic-judge-model',
+                       default='gemini-1.5-pro-002',
                        help='Model to use for semantic comparison')
     parser.add_argument('--skip-evaluation',
                        action='store_true',
