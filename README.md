@@ -1,3 +1,6 @@
+# Blog post
+You can find my blog post/tutorial for this repo [here](https://towardsdatascience.com/productionising-genai-agents-evaluating-tool-selection-with-automated-testing-f668065e69bd)
+
 # Tool Selection Tester for GenAI Agents
 
 A framework for testing and evaluating LLM's capabilities to select tools and respond to user queries across different scenarios. Compatible with Gemini and OpenAI models.
