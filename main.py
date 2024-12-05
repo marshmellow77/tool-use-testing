@@ -11,9 +11,6 @@ from evaluator import Evaluator
 from model_tester import ModelTester
 from datetime import datetime
 import logging
-import vertexai
-
-vertexai.init(project="heikohotz-genai-sa", location="us-central1")
 
 from utils import process_raw_responses
 
