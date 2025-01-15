@@ -11,6 +11,7 @@ from vertexai.generative_models import (
 )
 from models import GeminiModel
 from google.protobuf.json_format import MessageToDict
+from tenacity import retry, wait_exponential, retry_if_exception_type, before_sleep_log
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -27,11 +28,17 @@ class ModelTester:
         self.tools = ALL_FUNCTIONS.get_functions_for_model(model_type)
         logger.info(f"Initialized {len(self.tools) if isinstance(self.tools, list) else 'Gemini'} tools")
 
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=60),  # Exponential backoff between 4-60 seconds
+        retry=retry_if_exception_type((Exception)),  # Retry on any exception
+        before_sleep=before_sleep_log(logger, logging.WARNING)  # Log before retrying
+    )
     async def process_test_case(self, index, record):
         """Process a single test case and return raw response"""
         test_case = index + 1
         user_query = record['user_query']
         record_type = record['type']
+        expected_response_type = record['ground_truth']['expected_response_type']
 
         logger.info(f"Processing test case {record['id']} (type: {record_type})")
         
@@ -64,7 +71,7 @@ class ModelTester:
                                 'finish_reason': candidate.finish_reason,
                                 'avg_logprobs': candidate.avg_logprobs
                             }
-                            
+
                             if hasattr(candidate.content, 'parts'):
                                 for part in candidate.content.parts:
                                     part_dict = {}
@@ -84,7 +91,7 @@ class ModelTester:
                                     # Only append if we captured either text or function call
                                     if part_dict:
                                         candidate_dict['content']['parts'].append(part_dict)
-                            
+
                             response_dict['model_response']['candidates'].append(candidate_dict)
                     
                     if hasattr(response, 'usage_metadata'):
@@ -101,7 +108,7 @@ class ModelTester:
 
         except Exception as e:
             logger.error(f"Error processing test case {test_case}: {str(e)}")
-            return index, {"error": str(e)}
+            raise  # Re-raise the exception to trigger retry
 
     async def run_tests(self):
         logger.info(f"\nStarting test execution with {len(self.test_dataset)} test cases")
